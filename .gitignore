@@ -1,0 +1,33 @@
+.pio/
+*.o
+# Makefile dependency file for the vendored qrcodegen.c build (not a D-lang
+# source -- scoped narrowly since other *.d dep files under engine/src/ and
+# tools/preview/ are tracked on purpose).
+engine/third_party/qrcodegen/*.d
+tools/preview/yat-preview
+tools/preview/*.png
+tools/preview/out/
+firmware/include/secrets.h
+node_modules/
+.DS_Store
+.playwright-mcp/
+.omx/
+.claude/
+tools/wasm/yat-engine.js
+tools/wasm/yat-engine.wasm
+tools/fonts/.venv/
+tools/fonts/src/*.ttf
+tools/fonts/src/*.otf
+__pycache__/
+.todo-inbox.md
+tools/preview/*.d
+
+# Launch post drafts (owner-authored, not repo content)
+launch/
+/todo
+/publish
+/MAINTAINER.md
+.wrangler/
+
+# stray screenshots at the repo root
+/*.png

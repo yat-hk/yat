@@ -1,0 +1,1 @@
+<?xml version="1.0"?><feed><title>Atom Feed</title><entry><title>E1</title><link href="http://example.com/1" rel="alternate"/><summary>s1</summary><published>2026-07-27T10:00:00Z</published></entry><entry><title>E2</title><link href="http://example.com/2"/><content>c2</content><updated>2026-07-27T09:00:00+08:00</updated></entry></feed>

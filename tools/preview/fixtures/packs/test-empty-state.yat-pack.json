@@ -1,0 +1,99 @@
+{
+  "yat": 1,
+  "id": "test-empty-state",
+  "name": {
+    "en": "Empty state engine test",
+    "zh-Hant": "空狀態測試"
+  },
+  "description": {
+    "en": "Purpose-built pack exercising the §11.3 empty state: two `when`-gated https sources, so one pack drives every state the fallback card must tell apart — all-failed, some-data, stale-served, ..."
+  },
+  "aliases": {
+    "en": [
+      "empty state engine test"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "mode": {
+        "type": "string",
+        "title": "Mode",
+        "enum": [
+          "on",
+          "skip"
+        ],
+        "default": "on"
+      }
+    },
+    "required": [
+      "mode"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "alpha",
+        "type": "https",
+        "when": "params.mode == 'on'",
+        "url": "https://example.com/api/alpha",
+        "format": "json",
+        "extract": {
+          "a": "value"
+        }
+      },
+      {
+        "id": "beta",
+        "type": "https",
+        "when": "params.mode == 'on'",
+        "url": "https://example.com/api/beta",
+        "format": "json",
+        "extract": {
+          "b": "value"
+        }
+      }
+    ]
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [
+          16,
+          24,
+          16,
+          24
+        ],
+        "gap": 4,
+        "children": [
+          {
+            "type": "text",
+            "value": "empty state engine test",
+            "size": "medium",
+            "weight": "bold"
+          },
+          {
+            "type": "text",
+            "value": "alpha {{data.a}}",
+            "size": "small"
+          },
+          {
+            "type": "text",
+            "value": "beta {{data.b}}",
+            "size": "small"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

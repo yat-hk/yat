@@ -1,0 +1,1 @@
+0{{now|date_fmt('M月D日')}} {{now|weekday('zh-Hant')}}

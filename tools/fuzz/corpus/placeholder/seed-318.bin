@@ -1,0 +1,1 @@
+0{{params.quotes|pick_by_day}}

@@ -1,0 +1,1 @@
+storeQueue|length

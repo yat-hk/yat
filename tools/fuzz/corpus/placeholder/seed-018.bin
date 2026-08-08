@@ -1,0 +1,1 @@
+0T-minus {{params.exam_date|date_diff_days}} days

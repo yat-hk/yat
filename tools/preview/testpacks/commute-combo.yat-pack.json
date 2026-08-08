@@ -1,0 +1,374 @@
+{
+  "yat": 1,
+  "id": "commute-combo",
+  "version": "0.5.0",
+  "name": { "en": "Commute Board", "zh-Hant": "通勤班次板" },
+  "description": {
+    "en": "KMB ETAs for up to 4 stops, one Citybus stop, and MTR next trains for any line and station code, grouped by operator on one page.",
+    "zh-Hant": "一頁齊晒:最多四個九巴站、一個城巴站,同港鐵任何車站下班車(輸入綫同車站代碼),按營辦商分組顯示。"
+  },
+  "aliases": {
+    "en": ["commute", "commute board"],
+    "zh-Hant": ["返工", "通勤"],
+    "jyutping": ["faan1 gung1"]
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "kmb_stops": {
+        "type": "array",
+        "title": { "en": "KMB stops", "zh-Hant": "九巴站" },
+        "description": { "en": "Up to 4 KMB bus stops to show. Use the search below each row — type a route number and pick your stop, no code to remember.", "zh-Hant": "最多4個九巴站。用低面嘅「搵站」搜尋就得——打個路線號揀低你個站，唔使記代碼。" },
+        "minItems": 1,
+        "maxItems": 4,
+        "items": {
+          "type": "object",
+          "properties": {
+            "stop_id": {
+              "type": "string",
+              "title": { "en": "Stop ID", "zh-Hant": "站代碼" },
+              "description": { "en": "Search by route number and pick your stop — this fills in on its own.", "zh-Hant": "用路線號搵，揀低你個站，呢格會自動填好。" },
+              "x-picker": "kmb-stop",
+              "pattern": "^[0-9A-F]{16}$",
+              "minLength": 16,
+              "maxLength": 16
+            },
+            "route": {
+              "type": "string",
+              "title": { "en": "Route", "zh-Hant": "路線號" },
+              "description": { "en": "The route number as printed on the bus, e.g. 40.", "zh-Hant": "巴士車身印住嘅路線號，例如40。" },
+              "pattern": "^[A-Z0-9]{1,8}$",
+              "maxLength": 8
+            },
+            "label": {
+              "type": "string",
+              "title": { "en": "Label", "zh-Hant": "顯示名" },
+              "description": { "en": "A short name for this stop, shown on the panel.", "zh-Hant": "呢個站喺畫面度顯示嘅短名。" },
+              "minLength": 1,
+              "maxLength": 16
+            }
+          },
+          "required": ["stop_id", "route", "label"],
+          "additionalProperties": false
+        },
+        "default": [
+          { "stop_id": "A60AE774B09A5E44", "route": "40", "label": "荃灣大河道" },
+          { "stop_id": "878A6FDD75689A2D", "route": "272K", "label": "大學站" }
+        ]
+      },
+      "show_ctb": {
+        "type": "boolean",
+        "title": { "en": "Show Citybus section", "zh-Hant": "顯示城巴部分" },
+        "description": { "en": "Turn on to also show one Citybus stop below.", "zh-Hant": "開咗就會喺下面加顯示一個城巴站。" },
+        "default": true
+      },
+      "ctb_stop": {
+        "type": "string",
+        "title": { "en": "Citybus stop ID", "zh-Hant": "城巴站代碼" },
+        "description": { "en": "Search by route number and pick your stop — the route, direction and label below fill in with it.", "zh-Hant": "用路線號搵，揀低你個站——下面嘅路線、方向同顯示名都會跟住填好。" },
+        "x-picker": "ctb-stop",
+        "pattern": "^[0-9]{6}$",
+        "minLength": 6,
+        "maxLength": 6,
+        "default": "002403",
+        "depends_on": "show_ctb"
+      },
+      "ctb_route": {
+        "type": "string",
+        "title": { "en": "Citybus route", "zh-Hant": "城巴路線號" },
+        "description": { "en": "The route number as printed on the bus.", "zh-Hant": "巴士車身印住嘅路線號。" },
+        "pattern": "^[A-Z0-9]{1,8}$",
+        "maxLength": 8,
+        "default": "1",
+        "depends_on": "show_ctb"
+      },
+      "ctb_dir": {
+        "type": "string",
+        "title": { "en": "Citybus direction", "zh-Hant": "城巴方向" },
+        "description": { "en": "Pick the direction that matches your stop.", "zh-Hant": "揀返同你個站啱嘅方向。" },
+        "enum": ["I", "O"],
+        "enum_titles": [
+          { "en": "Inbound", "zh-Hant": "入" },
+          { "en": "Outbound", "zh-Hant": "出" }
+        ],
+        "default": "I",
+        "depends_on": "show_ctb"
+      },
+      "ctb_label": {
+        "type": "string",
+        "title": { "en": "Citybus stop label", "zh-Hant": "城巴站顯示名" },
+        "description": { "en": "A short name for this stop, shown on the panel.", "zh-Hant": "呢個站喺畫面度顯示嘅短名。" },
+        "minLength": 1,
+        "maxLength": 16,
+        "default": "跑馬地(上)",
+        "depends_on": "show_ctb"
+      },
+      "show_mtr": {
+        "type": "boolean",
+        "title": { "en": "Show MTR section", "zh-Hant": "顯示港鐵部分" },
+        "description": { "en": "Turn on to also show next-train times for one MTR station.", "zh-Hant": "開咗就會喺下面顯示一個港鐵站嘅下班車。" },
+        "default": true
+      },
+      "mtr_line": {
+        "type": "string",
+        "title": { "en": "MTR line", "zh-Hant": "港鐵綫" },
+        "description": { "en": "Search for your station by name below — the line and station code fill in together.", "zh-Hant": "喺下面用站名搵你個站——綫同站代碼會一齊填好。" },
+        "x-picker": "mtr-station",
+        "pattern": "^[A-Z]{3}$",
+        "minLength": 3,
+        "maxLength": 3,
+        "default": "TKL",
+        "depends_on": "show_mtr"
+      },
+      "mtr_sta": {
+        "type": "string",
+        "title": { "en": "MTR station", "zh-Hant": "港鐵站" },
+        "description": { "en": "Filled in automatically once you search for your station above.", "zh-Hant": "喺上面搵到你個站之後，呢格會自動填好。" },
+        "pattern": "^[A-Z]{3}$",
+        "minLength": 3,
+        "maxLength": 3,
+        "default": "LHP",
+        "depends_on": "show_mtr"
+      },
+      "mtr_label": {
+        "type": "string",
+        "title": { "en": "MTR station label", "zh-Hant": "港鐵站顯示名" },
+        "description": { "en": "A short name for this station, shown above the MTR rows.", "zh-Hant": "呢個站顯示喺港鐵部分上面嘅短名。" },
+        "minLength": 1,
+        "maxLength": 16,
+        "default": "康城",
+        "depends_on": "show_mtr"
+      },
+      "lang": {
+        "type": "string",
+        "title": { "en": "Language", "zh-Hant": "語言" },
+        "description": { "en": "Which language(s) to show on the panel.", "zh-Hant": "畫面用邊種語言顯示。" },
+        "enum": ["en", "zh", "both"],
+        "enum_titles": [
+          { "en": "English" },
+          { "en": "Chinese", "zh-Hant": "中文" },
+          { "en": "Bilingual", "zh-Hant": "雙語" }
+        ],
+        "default": "both"
+      }
+    },
+    "required": ["kmb_stops", "lang"],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "kmb",
+        "type": "https",
+        "for_each": "params.kmb_stops",
+        "url": "https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/{{each.stop_id}}",
+        "format": "json",
+        "max_bytes": 65536,
+        "collect": {
+          "field": "kmb_etas",
+          "extract": {
+            "dest_tc": "data[?route=='{{each.route}}'].dest_tc|[0]",
+            "dest_en": "data[?route=='{{each.route}}'].dest_en|[0]",
+            "eta1": "data[?route=='{{each.route}}'].eta|[0]",
+            "eta2": "data[?route=='{{each.route}}'].eta|[1]"
+          }
+        }
+      },
+      {
+        "id": "ctb",
+        "type": "https",
+        "when": "params.show_ctb",
+        "url": "https://rt.data.gov.hk/v2/transport/citybus/eta/CTB/{{params.ctb_stop}}/{{params.ctb_route}}",
+        "format": "json",
+        "max_bytes": 32768,
+        "extract": {
+          "ctb_etas": "data[?dir=='{{params.ctb_dir}}']|first(2)"
+        }
+      },
+      {
+        "id": "mtr",
+        "type": "https",
+        "when": "params.show_mtr",
+        "url": "https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line={{params.mtr_line}}&sta={{params.mtr_sta}}&lang=EN",
+        "format": "json",
+        "max_bytes": 32768,
+        "extract": {
+          "mtr_up": "data.\"{{params.mtr_line}}-{{params.mtr_sta}}\".UP|first(2)",
+          "mtr_down": "data.\"{{params.mtr_line}}-{{params.mtr_sta}}\".DOWN|first(2)",
+          "mtr_delay": "isdelay"
+        }
+      }
+    ]
+  },
+  "strings": {
+    "hdr_kmb": { "en": "KMB", "zh-Hant": "九巴" },
+    "hdr_ctb": { "en": "Citybus", "zh-Hant": "城巴" },
+    "hdr_mtr": { "en": "MTR", "zh-Hant": "港鐵" },
+    "no_eta": { "en": "No ETA", "zh-Hant": "暫無班次" },
+    "min": { "en": "min", "zh-Hant": "分鐘" },
+    "delay": { "en": "Delay", "zh-Hant": "延誤" },
+    "up": { "en": "UP", "zh-Hant": "上行" },
+    "down": { "en": "DOWN", "zh-Hant": "下行" }
+  },
+  "render": {
+    "chrome": "standard",
+    "lang_param": "lang",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [4, 12, 4, 12],
+        "gap": 4,
+        "children": [
+          {
+            "type": "column",
+            "gap": 2,
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "bus", "size": "small", "color": "red" },
+                  { "type": "text", "value": "{{strings.hdr_kmb}}", "size": "small", "weight": "bold", "flex": 1 }
+                ]
+              },
+              {
+                "type": "list",
+                "bind": "data.kmb_etas",
+                "max_rows": 4,
+                "gap": 2,
+                "empty_text": "{{strings.no_eta}}",
+                "row": [
+                  {
+                    "type": "row",
+                    "gap": 8,
+                    "flex": 1,
+                    "children": [
+                      { "type": "text", "value": "{{item.each.route}}", "size": "small", "weight": "bold" },
+                      { "type": "text", "value": "{{item.each.label}}", "size": "small" },
+                      { "type": "text", "value": "→{{item.dest_tc}}", "size": "small", "flex": 1, "when": "params.lang != 'en'" },
+                      { "type": "text", "value": "→{{item.dest_en}}", "size": "small", "flex": 1, "when": "params.lang == 'en'" },
+                      { "type": "text", "value": "{{item.eta1|time_hhmm}}", "size": "small", "weight": "bold", "align": "right", "when": "item.eta1 exists" },
+                      { "type": "text", "value": "—", "size": "small", "weight": "bold", "align": "right", "when": "item.eta1 missing" },
+                      { "type": "text", "value": "{{item.eta2|time_hhmm}}", "size": "small", "align": "right", "when": "item.eta2 exists" },
+                      { "type": "text", "value": "—", "size": "small", "align": "right", "when": "item.eta2 missing" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          { "type": "spacer", "flex": 1, "when": "params.show_ctb" },
+          { "type": "divider", "when": "params.show_ctb" },
+          {
+            "type": "column",
+            "gap": 2,
+            "when": "params.show_ctb",
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "bus", "size": "small", "color": "yellow" },
+                  { "type": "text", "value": "{{strings.hdr_ctb}} {{params.ctb_route}} · {{params.ctb_label}}", "size": "small", "weight": "bold", "flex": 1 }
+                ]
+              },
+              {
+                "type": "list",
+                "bind": "data.ctb_etas",
+                "max_rows": 2,
+                "gap": 2,
+                "empty_text": "{{strings.no_eta}}",
+                "row": [
+                  {
+                    "type": "row",
+                    "gap": 8,
+                    "flex": 1,
+                    "children": [
+                      { "type": "text", "value": "{{item.route}}", "size": "small", "weight": "bold" },
+                      { "type": "text", "value": "→{{item.dest_tc}}", "size": "small", "flex": 1, "when": "params.lang != 'en'" },
+                      { "type": "text", "value": "→{{item.dest_en}}", "size": "small", "flex": 1, "when": "params.lang == 'en'" },
+                      { "type": "text", "value": "{{item.eta|time_hhmm}}", "size": "small", "weight": "bold", "align": "right", "when": "item.eta exists" },
+                      { "type": "text", "value": "—", "size": "small", "weight": "bold", "align": "right", "when": "item.eta missing" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          { "type": "spacer", "flex": 1, "when": "params.show_mtr" },
+          { "type": "divider", "when": "params.show_mtr" },
+          {
+            "type": "column",
+            "gap": 2,
+            "when": "params.show_mtr",
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "train", "size": "small", "color": "blue" },
+                  { "type": "text", "value": "{{strings.hdr_mtr}} · {{params.mtr_label}}", "size": "small", "weight": "bold", "flex": 1 },
+                  { "type": "icon", "name": "alert", "size": "small", "color": "danger", "when": "data.mtr_delay == 'Y'" },
+                  { "type": "text", "value": "{{strings.delay}}", "size": "small", "color": "danger", "when": "data.mtr_delay == 'Y'" }
+                ]
+              },
+              {
+                "type": "list",
+                "bind": "data.mtr_up",
+                "max_rows": 2,
+                "gap": 2,
+                "when": "data.mtr_up",
+                "row": [
+                  {
+                    "type": "row",
+                    "gap": 8,
+                    "align": "center",
+                    "flex": 1,
+                    "children": [
+                      { "type": "icon", "name": "arrow_up", "size": "small" },
+                      { "type": "text", "value": "{{strings.up}}", "size": "small", "flex": 1 },
+                      { "type": "text", "value": "· P{{item.plat}}", "size": "small" },
+                      { "type": "text", "value": "· {{item.ttnt}} {{strings.min}}", "size": "small", "weight": "bold", "align": "right" }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "list",
+                "bind": "data.mtr_down",
+                "max_rows": 2,
+                "gap": 2,
+                "when": "data.mtr_down",
+                "row": [
+                  {
+                    "type": "row",
+                    "gap": 8,
+                    "align": "center",
+                    "flex": 1,
+                    "children": [
+                      { "type": "icon", "name": "arrow_down", "size": "small" },
+                      { "type": "text", "value": "{{strings.down}}", "size": "small", "flex": 1 },
+                      { "type": "text", "value": "· P{{item.plat}}", "size": "small" },
+                      { "type": "text", "value": "· {{item.ttnt}} {{strings.min}}", "size": "small", "weight": "bold", "align": "right" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": { "every_min": 30 },
+    "windows": [
+      { "days": ["mon", "tue", "wed", "thu", "fri"], "from": "07:00", "to": "09:30", "every_min": 5 },
+      { "days": ["mon", "tue", "wed", "thu", "fri"], "from": "17:30", "to": "20:00", "every_min": 5 }
+    ]
+  }
+}

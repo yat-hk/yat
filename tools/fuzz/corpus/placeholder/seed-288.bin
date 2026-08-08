@@ -1,0 +1,1 @@
+0{{params.date_1|date_fmt('D/M/YYYY')}} · {{params.date_1|weekday('en-short')}}

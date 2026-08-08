@@ -1,0 +1,1 @@
+3{"all": ["data.tide4_time > '{{now|date_fmt('HHmm')}}'", "data.tide3_time <= '{{now|date_fmt('HHmm')}}'"]}

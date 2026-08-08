@@ -1,0 +1,1 @@
+0{{data.empty_arr|pick_by_day}}

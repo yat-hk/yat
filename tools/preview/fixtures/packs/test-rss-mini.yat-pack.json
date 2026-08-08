@@ -1,0 +1,93 @@
+{
+  "yat": 1,
+  "id": "test-rss-mini",
+  "name": {
+    "en": "RSS engine test (internal)"
+  },
+  "description": {
+    "en": "Purpose-built pack exercising the RSS/Atom extraction path against a checked-in 3-item fixture. Not a real content pack."
+  },
+  "aliases": {
+    "en": [
+      "rss engine test"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "feed",
+        "type": "https",
+        "url": "https://example.com/feed.xml",
+        "format": "rss",
+        "extract": {
+          "feed_title": "feed.title",
+          "title1": "items[0].title",
+          "desc1": "items[0].description",
+          "pubdate1": "items[0].pub_date",
+          "link1": "items[0].link",
+          "title2": "items[1].title",
+          "pubdate2": "items[1].pub_date",
+          "title3": "items[2].title",
+          "pubdate3": "items[2].pub_date",
+          "count": "items|length"
+        }
+      }
+    ]
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [
+          16,
+          24,
+          16,
+          24
+        ],
+        "gap": 4,
+        "children": [
+          {
+            "type": "text",
+            "value": "{{data.feed_title}}",
+            "size": "medium",
+            "weight": "bold"
+          },
+          {
+            "type": "text",
+            "value": "{{data.title1}}",
+            "size": "small"
+          },
+          {
+            "type": "text",
+            "value": "{{data.title2}}",
+            "size": "small"
+          },
+          {
+            "type": "text",
+            "value": "{{data.title3}}",
+            "size": "small"
+          },
+          {
+            "type": "text",
+            "value": "{{data.count}}",
+            "size": "small"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

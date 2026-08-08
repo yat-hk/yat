@@ -1,0 +1,71 @@
+{
+  "yat": 1,
+  "id": "test-image-mini",
+  "name": {
+    "en": "image widget engine test (inte"
+  },
+  "description": {
+    "en": "Purpose-built pack exercising §9.10 the `image` widget: form-(b) src (the whole URL supplied by one param), fit contain vs stretch selected by two mutually-exclusive `image` widgets (exactly the §9..."
+  },
+  "aliases": {
+    "en": [
+      "image engine test"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "image_url": {
+        "type": "string",
+        "title": "Image URL",
+        "default": "https://example.com/test.png",
+        "maxLength": 1024
+      },
+      "fit": {
+        "type": "string",
+        "title": "Fit",
+        "enum": [
+          "contain",
+          "stretch"
+        ],
+        "default": "contain"
+      }
+    },
+    "required": [
+      "image_url",
+      "fit"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": []
+  },
+  "render": {
+    "chrome": "none",
+    "widgets": [
+      {
+        "type": "image",
+        "src": "{{params.image_url}}",
+        "width": 400,
+        "height": 300,
+        "fit": "contain",
+        "when": "params.fit == 'contain'"
+      },
+      {
+        "type": "image",
+        "src": "{{params.image_url}}",
+        "width": 400,
+        "height": 300,
+        "fit": "stretch",
+        "when": "params.fit == 'stretch'"
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

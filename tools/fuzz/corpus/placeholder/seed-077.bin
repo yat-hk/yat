@@ -1,0 +1,1 @@
+1https://rt.data.gov.hk/v2/transport/citybus/eta/CTB/{{params.ctb_stop}}/{{params.ctb_route}}

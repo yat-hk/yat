@@ -1,0 +1,32 @@
+# YAT 32MB flash layout (ARCHITECTURE.md §7).
+#
+#   nvs        20K   wifi creds, secrets, yat/hash
+#   otadata     8K
+#   ota_0       6M   app slot A
+#   ota_1       6M   app slot B
+#   phy_init    4K
+#   littlefs  ~19.9M config.json, packs, fonts
+#
+# App slots are 6MB each: the app image carries the engine's bitmap font tables
+# (~1.38MB, engine/src/fonts_data_*.cpp), so OTA images must stay comfortably
+# under 6MB. As of the v0.3 typography work the image is ~2.95MB / 49.1%.
+#
+# phy_init sits *after* the app slots on purpose: nvs(0x5000) + otadata(0x2000)
+# already fill 0x9000..0x10000, and an app partition must start on a 64KB
+# boundary, so there is no room for it in the low region without shrinking nvs.
+#
+# Note: comments must be on their own line — the 5th CSV column is Flags, not
+# a comment field, and gen_esp32part.py rejects anything it does not recognise.
+#
+# The data volume uses subtype 'littlefs' (0x83), not 'spiffs'. Arduino's
+# LittleFS.begin() defaults to partitionLabel "spiffs", so mounting it needs the
+# label spelled out: LittleFS.begin(true, "/littlefs", 10, "littlefs").
+# Nothing mounts it in v0.1; it is here so the layout is final before flashing.
+#
+# Name,     Type, SubType, Offset,    Size
+nvs,        data, nvs,     0x9000,    0x5000
+otadata,    data, ota,     0xe000,    0x2000
+ota_0,      app,  ota_0,   0x10000,   0x600000
+ota_1,      app,  ota_1,   0x610000,  0x600000
+phy_init,   data, phy,     0xc10000,  0x1000
+littlefs,   data, littlefs, 0xc11000, 0x13ef000

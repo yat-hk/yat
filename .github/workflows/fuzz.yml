@@ -1,0 +1,73 @@
+name: Fuzz
+
+# PACK-SPEC.md §12.3(9): "all fetched bytes are hostile input; engines
+# enforce size caps before parse and are fuzzed in CI (native target)."
+# This is that job — separate from ci.yml since it's exploratory/bounded
+# rather than pass/fail-on-diff, and runs on a schedule too, not just on
+# every push.
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'engine/**'
+      - 'tools/fuzz/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'engine/**'
+      - 'tools/fuzz/**'
+  schedule:
+    # Mondays 06:00 UTC — catches regressions even on weeks with no engine/
+    # or tools/fuzz/ push (corpus bit-rot, toolchain/compiler-rt drift).
+    - cron: '0 6 * * 1'
+  workflow_dispatch: {}
+
+concurrency:
+  group: fuzz-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    # The same tree lives in a private working repo; jobs run only on the public one.
+    if: github.repository == 'yat-hk/yat'
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [rss, csv, path, placeholder]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+
+      - name: Verify this clang can link a libFuzzer binary
+        run: |
+          echo 'extern "C" int LLVMFuzzerTestOneInput(const unsigned char*, unsigned long){return 0;}' > /tmp/check.cpp
+          clang++ -fsanitize=fuzzer -std=c++17 /tmp/check.cpp -o /tmp/check
+
+      - name: Build fuzz-${{ matrix.target }} (libFuzzer + ASan + UBSan)
+        run: make -C tools/fuzz fuzz-${{ matrix.target }} CXX=clang++
+
+      # Bounded: -max_total_time=60 or -runs=200000, whichever hits first
+      # (see tools/fuzz/Makefile's TIME_BUDGET/RUNS_BUDGET). ASan's
+      # LeakSanitizer runs by default on Linux; -fno-sanitize-recover=all
+      # (baked into the Makefile's FUZZ_SAN) makes any UBSan finding fatal
+      # too, not just a printed warning.
+      - name: Fuzz ${{ matrix.target }} over seed corpus (60s / 200000 runs)
+        run: make -C tools/fuzz run-fuzz-${{ matrix.target }} CXX=clang++ TIME_BUDGET=60 RUNS_BUDGET=200000
+
+      - name: Upload crash artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-crash-${{ matrix.target }}
+          path: |
+            tools/fuzz/artifacts/
+            tools/fuzz/corpus_out/${{ matrix.target }}/
+          if-no-files-found: ignore
+          retention-days: 14

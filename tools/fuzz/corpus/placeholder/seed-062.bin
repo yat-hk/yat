@@ -1,0 +1,1 @@
+0https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=HLT&station={{params.station}}&year={{now|date_fmt('YYYY')}}&month={{now|date_fmt('M')}}&day={{now|date_fmt('D')}}&rformat=json

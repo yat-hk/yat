@@ -1,0 +1,1 @@
+daily.temperature_2m_min[0]|round(0)

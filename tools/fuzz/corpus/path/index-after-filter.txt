@@ -1,0 +1,1 @@
+temperature.data[?place=='Sha Tin'][0]

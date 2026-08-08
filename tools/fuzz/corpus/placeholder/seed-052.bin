@@ -1,0 +1,1 @@
+0https://api.open-meteo.com/v1/forecast?latitude={{params.latitude}}&longitude={{params.longitude}}&current=temperature_2m&hourly=temperature_2m&temporal_resolution=hourly_3&forecast_days=1&daily=temperature_2m_max,temperature_2m_min&timezone=auto

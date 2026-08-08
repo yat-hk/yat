@@ -1,0 +1,11 @@
+{
+  "name": "yat_engine",
+  "version": "0.1.0",
+  "description": "YAT declarative pack spec engine - portable core (firmware / native CLI / WASM)",
+  "build": {
+    "srcDir": "src",
+    "includeDir": "include",
+    "flags": ["-std=gnu++17"]
+  },
+  "dependencies": { "bblanchon/ArduinoJson": "^7.4.2" }
+}

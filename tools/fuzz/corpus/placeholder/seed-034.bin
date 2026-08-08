@@ -1,0 +1,1 @@
+0data.tide1_time > '{{now|date_fmt('HHmm')}}'

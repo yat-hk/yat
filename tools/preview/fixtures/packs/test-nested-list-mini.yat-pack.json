@@ -1,0 +1,96 @@
+{
+  "yat": 1,
+  "id": "test-nested-list-mini",
+  "name": {
+    "en": "nested list engine test (inter"
+  },
+  "description": {
+    "en": "Purpose-built pack exercising §9.8a nested-list rendering: a for_each source's collect.field drives an outer list, and its collect.extract array field drives one nested list per outer row. Not a re..."
+  },
+  "aliases": {
+    "en": [
+      "nested list engine test"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "groups": {
+        "type": "array",
+        "title": "Groups",
+        "maxItems": 3,
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16
+        },
+        "default": [
+          "g1",
+          "g2"
+        ]
+      }
+    },
+    "required": [
+      "groups"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "groups",
+        "type": "https",
+        "for_each": "params.groups",
+        "url": "https://example.com/api/group/{{each}}",
+        "format": "json",
+        "collect": {
+          "field": "sections",
+          "extract": {
+            "items": "items|first(3)"
+          }
+        }
+      }
+    ]
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "list",
+        "bind": "data.sections",
+        "max_rows": 3,
+        "gap": 8,
+        "row": [
+          {
+            "type": "text",
+            "value": "{{item.each}}",
+            "size": "small",
+            "weight": "bold"
+          },
+          {
+            "type": "list",
+            "bind": "item.items",
+            "max_rows": 3,
+            "gap": 2,
+            "empty_text": "no items",
+            "row": [
+              {
+                "type": "text",
+                "value": "{{index}}. {{item.name}}",
+                "size": "small"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

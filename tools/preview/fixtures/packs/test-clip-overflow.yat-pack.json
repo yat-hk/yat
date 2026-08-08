@@ -1,0 +1,152 @@
+{
+  "yat": 1,
+  "id": "test-clip-overflow",
+  "version": "1.0.0",
+  "name": {
+    "en": "Clip overflow",
+    "zh-Hant": "溢出裁切測試"
+  },
+  "description": {
+    "en": "Deliberately overflows its content box: ten 30px bars and a paragraph in a 404px area. Guards PACK-SPEC §9.3(5) — unclipped, its tail painted over the footer (the temp-trend bug).",
+    "zh-Hant": "刻意畫多過一版：十行 bar 加一段字塞入 404px 內容區，用嚟守住 PACK-SPEC §9.3(5)——未裁切之前尾段會畫落頁腳（temp-trend 個問題）。"
+  },
+  "aliases": {
+    "en": [
+      "clip"
+    ],
+    "zh-Hant": [
+      "裁切"
+    ],
+    "jyutping": [
+      "coi4 cit3"
+    ]
+  },
+  "params": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "vals",
+        "type": "inline",
+        "data": {
+          "a": 10,
+          "b": 30,
+          "c": 55,
+          "d": 70,
+          "e": 90,
+          "f": 100
+        },
+        "extract": {
+          "a": "a",
+          "b": "b",
+          "c": "c",
+          "d": "d",
+          "e": "e",
+          "f": "f"
+        }
+      }
+    ]
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "column",
+        "gap": 10,
+        "padding": [
+          10,
+          20,
+          10,
+          20
+        ],
+        "children": [
+          {
+            "type": "bar",
+            "value": "{{data.a}}",
+            "min": 0,
+            "max": 100,
+            "height": 30
+          },
+          {
+            "type": "bar",
+            "value": "{{data.b}}",
+            "min": 0,
+            "max": 100,
+            "height": 30
+          },
+          {
+            "type": "bar",
+            "value": "{{data.c}}",
+            "min": 0,
+            "max": 100,
+            "height": 30
+          },
+          {
+            "type": "bar",
+            "value": "{{data.d}}",
+            "min": 0,
+            "max": 100,
+            "height": 30
+          },
+          {
+            "type": "bar",
+            "value": "{{data.e}}",
+            "min": 0,
+            "max": 100,
+            "height": 30
+          },
+          {
+            "type": "bar",
+            "value": "{{data.f}}",
+            "min": 0,
+            "max": 100,
+            "height": 30,
+            "color": "red"
+          },
+          {
+            "type": "bar",
+            "value": "{{data.a}}",
+            "min": 0,
+            "max": 100,
+            "height": 30
+          },
+          {
+            "type": "bar",
+            "value": "{{data.b}}",
+            "min": 0,
+            "max": 100,
+            "height": 30
+          },
+          {
+            "type": "bar",
+            "value": "{{data.c}}",
+            "min": 0,
+            "max": 100,
+            "height": 30
+          },
+          {
+            "type": "bar",
+            "value": "{{data.d}}",
+            "min": 0,
+            "max": 100,
+            "height": 30
+          },
+          {
+            "type": "text",
+            "value": "This paragraph starts below the bottom of the content area, so none of it may appear: not one glyph of it, and above all not a sliced half-line sitting on the footer rule.",
+            "size": "medium",
+            "max_lines": 3
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

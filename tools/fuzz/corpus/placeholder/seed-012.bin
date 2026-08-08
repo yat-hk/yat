@@ -1,0 +1,1 @@
+0Purpose-built pack exercising for_each + collect fan-out, {{each}} substitution, and URL percent-encoding against checked-in JSON fixtures. Not a real content pack.

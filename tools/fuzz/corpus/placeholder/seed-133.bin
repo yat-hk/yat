@@ -1,0 +1,1 @@
+1{{data.queue_len}} {{strings.queue_len}}

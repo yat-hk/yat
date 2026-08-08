@@ -1,0 +1,1 @@
+hourly.temperature_2m[2]|round(0)

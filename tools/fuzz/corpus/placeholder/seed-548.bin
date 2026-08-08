@@ -1,0 +1,1 @@
+1https://example.com/?q={{data.title}}&x={{params.district}}

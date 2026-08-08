@@ -1,0 +1,1 @@
+0{{item.chg|sign_char}}{{item.chg|abs|round(2)}} ({{item.pct|sign_char}}{{item.pct|abs|round(2)}}%)

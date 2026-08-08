@@ -1,0 +1,1 @@
+rates.HKD|round(4)

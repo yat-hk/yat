@@ -1,0 +1,90 @@
+{
+  "yat": 1,
+  "id": "test-csv-mini",
+  "name": {
+    "en": "CSV engine test (internal)"
+  },
+  "description": {
+    "en": "Purpose-built pack exercising RFC 4180 CSV extraction (§5.5) in both has_header modes against one checked-in fixture. Not a real content pack."
+  },
+  "aliases": {
+    "en": [
+      "csv engine test"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "hdr",
+        "type": "https",
+        "url": "https://example.com/data.csv",
+        "format": "csv",
+        "csv": {
+          "has_header": true
+        },
+        "extract": {
+          "name0": "rows[0].name",
+          "age0": "rows[0].age",
+          "city0": "rows[0].city",
+          "name1": "rows[1].name",
+          "count": "rows|length"
+        }
+      },
+      {
+        "id": "nohdr",
+        "type": "https",
+        "url": "https://example.com/data.csv",
+        "format": "csv",
+        "csv": {
+          "has_header": false
+        },
+        "extract": {
+          "cell00": "rows[0][0]",
+          "cell02": "rows[0][2]",
+          "cell10": "rows[1][0]",
+          "count2": "rows|length"
+        }
+      }
+    ]
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [
+          16,
+          24,
+          16,
+          24
+        ],
+        "gap": 4,
+        "children": [
+          {
+            "type": "text",
+            "value": "{{data.name0}} {{data.age0}} {{data.city0}}",
+            "size": "medium"
+          },
+          {
+            "type": "text",
+            "value": "{{data.cell00}} {{data.cell02}}",
+            "size": "small"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

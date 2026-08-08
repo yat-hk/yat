@@ -1,0 +1,699 @@
+{
+  "yat": 1,
+  "id": "test-icons-sheet",
+  "name": {
+    "en": "icon sheet engine test"
+  },
+  "description": {
+    "en": "Contact sheet of the closed §9.9 icon catalog at medium size, each labelled. Golden fixture for the 24x24 bitmaps. Not a real content pack."
+  },
+  "aliases": {
+    "en": [
+      "icon sheet"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": []
+  },
+  "render": {
+    "chrome": "none",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "gap": 8,
+        "padding": [8, 6, 8, 6],
+        "children": [
+          {
+            "type": "row",
+            "align": "center",
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "sun",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "sun",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "moon",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "moon",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "cloud",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "cloud",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "cloud_sun",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "cloud_sun",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "align": "center",
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "cloud_moon",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "cloud_moon",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "rain",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "rain",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "rain_heavy",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "rain_heavy",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "drizzle",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "drizzle",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "align": "center",
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "thunder",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "thunder",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "fog",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "fog",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "wind",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "wind",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "humidity",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "humidity",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "align": "center",
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "thermometer_hot",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "thermometer_hot",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "thermometer_cold",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "thermometer_cold",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "bus",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "bus",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "minibus",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "minibus",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "align": "center",
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "train",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "train",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "tram",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "tram",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "ferry",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "ferry",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "clock",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "clock",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "align": "center",
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "calendar",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "calendar",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "alert",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "alert",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "info",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "info",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "check",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "check",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "align": "center",
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "cross",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "cross",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "arrow_up",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "arrow_up",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "arrow_down",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "arrow_down",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "arrow_right",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "arrow_right",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "align": "center",
+            "children": [
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "battery",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "battery",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "wifi",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "wifi",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "location",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "location",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "gap": 6,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "icon",
+                    "name": "star",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "star",
+                    "size": "small",
+                    "flex": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 1440
+    }
+  }
+}

@@ -1,0 +1,155 @@
+name: Release
+
+# Two ways in:
+#   - push a tag matching v* -> build, package, and publish a GitHub release
+#   - workflow_dispatch      -> same build+package, but upload as a run artifact
+#                               instead of publishing, so the pipeline can be
+#                               dry-run tested without cutting a tag.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  firmware-build:
+    runs-on: ubuntu-latest
+    # The same tree lives in a private working repo; jobs run only on the public one.
+    if: github.repository == 'yat-hk/yat'
+    strategy:
+      fail-fast: false
+      # One leg at a time. The final step of every leg publishes into the SAME
+      # GitHub release, and two legs finishing together would both find no
+      # release for the tag and both try to create it — one of them losing the
+      # race and failing the pipeline on a tag that is already pushed. Two
+      # sequential builds of a release is a few minutes; a half-published
+      # release is a model whose devices cannot update.
+      max-parallel: 1
+      matrix:
+        # One entry per model firmware/platformio.ini has an env for. Every
+        # step below keys off ${{ matrix.model }}, so a release publishes the
+        # full set — firmware-<model>.bin, .factory.bin, .uf2, manifest-<model>
+        # .json — for each. The name here IS the wire name: it picks the pio
+        # env, it is what the device reports as "model" in /api/status and
+        # serial STATUS, and it is what yat_ota.cpp asks GitHub for by
+        # filename, so an entry added here without a matching env (or vice
+        # versa) shows up as a device that cannot update itself.
+        # e1002 is the launch model; e1001 is the mono panel.
+        model: [e1002, e1001]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ runner.os }}-${{ hashFiles('firmware/platformio.ini') }}
+          restore-keys: |
+            pio-${{ runner.os }}-
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Create placeholder secrets.h
+        # firmware/include/secrets.h is gitignored; the placeholder values in
+        # secrets.h.example compile fine (they just won't associate to WiFi).
+        # Provisioning work (ROADMAP v0.2+) is making even that unnecessary.
+        run: cp firmware/include/secrets.h.example firmware/include/secrets.h
+
+      - name: Build firmware
+        # Release builds serve the device-portal bootstrap from the public
+        # site; without this override the binary would carry platformio.ini's
+        # LAN-IP dev default and every shipped device's setup page would 404.
+        env:
+          PLATFORMIO_BUILD_FLAGS: -DYAT_PORTAL_UI_BASE='"https://yat.day"'
+        run: cd firmware && pio run -e ${{ matrix.model }}
+
+      - name: List build output
+        run: ls -la firmware/.pio/build/${{ matrix.model }}/
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=dev-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Assemble release artifacts
+        id: artifacts
+        run: |
+          set -euo pipefail
+          MODEL="${{ matrix.model }}"
+          BUILD_DIR="firmware/.pio/build/${MODEL}"
+          OUT_DIR="release-out"
+          mkdir -p "$OUT_DIR"
+
+          # OTA app image.
+          cp "$BUILD_DIR/firmware.bin" "$OUT_DIR/firmware-${MODEL}.bin"
+
+          # Merged full-flash image. PlatformIO's espressif32 platform builds
+          # this automatically as a post-build step; fall back to a manual
+          # esptool merge-bin at the same offsets if it's ever missing (e.g.
+          # a platform version that drops the auto-merge).
+          if [ -f "$BUILD_DIR/firmware.factory.bin" ]; then
+            cp "$BUILD_DIR/firmware.factory.bin" "$OUT_DIR/firmware-${MODEL}.factory.bin"
+          else
+            echo "::warning::firmware.factory.bin missing from build dir, merging manually"
+            pip install esptool
+            BOOT_APP0="$(python3 -c "import glob; print(glob.glob('$HOME/.platformio/packages/framework-arduinoespressif32*/tools/partitions/boot_app0.bin')[0])")"
+            esptool --chip esp32s3 merge-bin \
+              -o "$OUT_DIR/firmware-${MODEL}.factory.bin" \
+              --flash-mode dio --flash-freq 80m --flash-size 32MB \
+              0x0 "$BUILD_DIR/bootloader.bin" \
+              0x8000 "$BUILD_DIR/partitions.bin" \
+              0xe000 "$BOOT_APP0" \
+              0x10000 "$BUILD_DIR/firmware.bin"
+          fi
+
+          # UF2, converted from the factory (full-flash) image so a drag-and-
+          # drop UF2 flash lays down bootloader + partitions + app in one go.
+          # Family ID is ESP32-S3; base address 0x0 matches the factory
+          # image's start offset (bootloader lives at flash offset 0x0000).
+          python3 tools/release/uf2conv.py \
+            -b 0x0 -f 0xc47e5767 -c \
+            -o "$OUT_DIR/firmware-${MODEL}.uf2" \
+            "$OUT_DIR/firmware-${MODEL}.factory.bin"
+
+          # Manifest: name/size/sha256 per artifact, keyed by role.
+          python3 tools/release/make_manifest.py \
+            --model "${MODEL}" \
+            --version "${{ steps.version.outputs.version }}" \
+            --output "$OUT_DIR/manifest-${MODEL}.json" \
+            app="$OUT_DIR/firmware-${MODEL}.bin" \
+            factory="$OUT_DIR/firmware-${MODEL}.factory.bin" \
+            uf2="$OUT_DIR/firmware-${MODEL}.uf2"
+
+          echo "out_dir=$OUT_DIR" >> "$GITHUB_OUTPUT"
+          ls -la "$OUT_DIR"
+          cat "$OUT_DIR/manifest-${MODEL}.json"
+
+      - name: Upload artifacts (workflow_dispatch dry run)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.model }}-${{ steps.version.outputs.version }}
+          path: ${{ steps.artifacts.outputs.out_dir }}/*
+          if-no-files-found: error
+
+      - name: Publish release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.artifacts.outputs.out_dir }}/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true

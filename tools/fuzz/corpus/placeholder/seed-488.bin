@@ -1,0 +1,1 @@
+3{"all": ["data.aqhi >= '4'", "data.aqhi <= '6'"]}

@@ -1,0 +1,10 @@
+{
+  "WTCSGNL": {
+    "name": "Tropical Cyclone Warning Signal",
+    "code": "TC8NE",
+    "type": "Gale or Storm Signal No. 8 (Northeast)",
+    "actionCode": "ISSUE",
+    "issueTime": "2026-07-28T14:20:00+08:00",
+    "updateTime": "2026-07-28T14:20:00+08:00"
+  }
+}

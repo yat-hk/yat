@@ -1,0 +1,65 @@
+{
+  "yat": 1,
+  "id": "test-s2t-mini",
+  "name": {
+    "en": "s2t filter test (internal)"
+  },
+  "description": {
+    "en": "Purpose-built pack exercising simplified->traditional Chinese conversion filter (§8.7). Not a real content pack."
+  },
+  "aliases": {
+    "en": [
+      "s2t filter test"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {},
+    "required": [],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "test",
+        "type": "inline",
+        "data": {
+          "txt": "简体转繁体测试"
+        },
+        "extract": {
+          "txt": "txt"
+        }
+      }
+    ]
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [
+          16,
+          24,
+          16,
+          24
+        ],
+        "gap": 4,
+        "children": [
+          {
+            "type": "text",
+            "value": "{{data.txt|s2t}}",
+            "size": "medium"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 1440
+    }
+  }
+}

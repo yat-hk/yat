@@ -1,0 +1,1 @@
+1[?station=='{{params.station}}'].publish_date|[0]

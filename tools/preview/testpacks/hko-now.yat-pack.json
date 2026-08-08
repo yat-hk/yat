@@ -1,0 +1,390 @@
+{
+  "yat": 1,
+  "id": "hko-now",
+  "version": "0.2.1",
+  "name": {
+    "en": "Weather Now",
+    "zh-Hant": "現時天氣"
+  },
+  "description": {
+    "en": "Current temperature and humidity for one district from the Hong Kong Observatory, with every HKO warning in force colour-coded. The temperature turns red at 33° and above, blue at 12° and below.",
+    "zh-Hant": "顯示所選地區嘅現時氣溫同濕度，數據直接嚟自香港天文台；氣溫33度或以上會轉紅色，12度或以下轉藍色。下面會列出所有現正生效嘅天文台警告（熱帶氣旋信號、暴雨、雷暴、酷熱／寒冷、季候風、火災、山泥傾瀉、水浸、霜凍、海嘯），並用顏色分辨。冇警告生效就唔會顯示。"
+  },
+  "aliases": {
+    "en": [
+      "weather"
+    ],
+    "zh-Hant": [
+      "天氣"
+    ],
+    "jyutping": [
+      "tin1 hei3"
+    ]
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "district": {
+        "type": "string",
+        "title": { "en": "District", "zh-Hant": "地區" },
+        "description": { "en": "Pick the one nearest your home.", "zh-Hant": "揀最近你屋企嗰區。" },
+        "enum": ["京士柏", "香港天文台", "黃竹坑", "打鼓嶺", "流浮山", "大埔", "沙田", "屯門", "將軍澳", "西貢", "長洲", "赤鱲角", "青衣", "荃灣可觀", "荃灣城門谷", "香港公園", "筲箕灣", "九龍城", "跑馬地", "黃大仙", "赤柱", "觀塘", "深水埗", "啟德跑道公園", "元朗公園", "大美督"],
+        "enum_titles": [
+          { "en": "King's Park", "zh-Hant": "京士柏" },
+          { "en": "Hong Kong Observatory", "zh-Hant": "香港天文台" },
+          { "en": "Wong Chuk Hang", "zh-Hant": "黃竹坑" },
+          { "en": "Ta Kwu Ling", "zh-Hant": "打鼓嶺" },
+          { "en": "Lau Fau Shan", "zh-Hant": "流浮山" },
+          { "en": "Tai Po", "zh-Hant": "大埔" },
+          { "en": "Sha Tin", "zh-Hant": "沙田" },
+          { "en": "Tuen Mun", "zh-Hant": "屯門" },
+          { "en": "Tseung Kwan O", "zh-Hant": "將軍澳" },
+          { "en": "Sai Kung", "zh-Hant": "西貢" },
+          { "en": "Cheung Chau", "zh-Hant": "長洲" },
+          { "en": "Chek Lap Kok", "zh-Hant": "赤鱲角" },
+          { "en": "Tsing Yi", "zh-Hant": "青衣" },
+          { "en": "Tsuen Wan Ho Koon", "zh-Hant": "荃灣可觀" },
+          { "en": "Tsuen Wan Shing Mun Valley", "zh-Hant": "荃灣城門谷" },
+          { "en": "Hong Kong Park", "zh-Hant": "香港公園" },
+          { "en": "Shau Kei Wan", "zh-Hant": "筲箕灣" },
+          { "en": "Kowloon City", "zh-Hant": "九龍城" },
+          { "en": "Happy Valley", "zh-Hant": "跑馬地" },
+          { "en": "Wong Tai Sin", "zh-Hant": "黃大仙" },
+          { "en": "Stanley", "zh-Hant": "赤柱" },
+          { "en": "Kwun Tong", "zh-Hant": "觀塘" },
+          { "en": "Sham Shui Po", "zh-Hant": "深水埗" },
+          { "en": "Kai Tak Runway Park", "zh-Hant": "啟德跑道公園" },
+          { "en": "Yuen Long Park", "zh-Hant": "元朗公園" },
+          { "en": "Tai Mei Tuk", "zh-Hant": "大美督" }
+        ],
+        "default": "沙田"
+      }
+    },
+    "required": [
+      "district"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "current",
+        "type": "https",
+        "url": "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc",
+        "format": "json",
+        "extract": {
+          "temp": "temperature.data[?place=='{{params.district}}'].value|[0]",
+          "humidity": "humidity.data[0].value",
+          "updated": "updateTime"
+        }
+      },
+      {
+        "id": "warnsum",
+        "type": "https",
+        "url": "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc",
+        "format": "json",
+        "max_bytes": 8192,
+        "extract": {
+          "w_tc": "WTCSGNL.code",
+          "w_rain": "WRAIN.code",
+          "w_ts": "WTS.code",
+          "w_hot": "WHOT.code",
+          "w_cold": "WCOLD.code",
+          "w_monsoon": "WMSGNL.code",
+          "w_fire": "WFIRE.code",
+          "w_landslip": "WL.code",
+          "w_flood": "WFNTSA.code",
+          "w_frost": "WFROST.code",
+          "w_tsunami": "WTMW.code"
+        }
+      }
+    ]
+  },
+  "compute": {
+    "warn_a": "{{data.w_tc}}{{data.w_rain}}{{data.w_ts}}{{data.w_hot}}{{data.w_cold}}{{data.w_monsoon}}",
+    "warn_b": "{{data.w_fire}}{{data.w_landslip}}{{data.w_flood}}{{data.w_frost}}{{data.w_tsunami}}"
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [
+          12,
+          32,
+          10,
+          32
+        ],
+        "gap": 10,
+        "children": [
+          {
+            "type": "spacer",
+            "flex": 1
+          },
+          {
+            "type": "row",
+            "gap": 24,
+            "align": "center",
+            "children": [
+              {
+                "type": "bignum",
+                "value": "{{data.temp}}°",
+                "size": "xlarge",
+                "color": "red",
+                "when": "data.temp >= '33'"
+              },
+              {
+                "type": "bignum",
+                "value": "{{data.temp}}°",
+                "size": "xlarge",
+                "color": "blue",
+                "when": "data.temp <= '12'"
+              },
+              {
+                "type": "bignum",
+                "value": "{{data.temp}}°",
+                "size": "xlarge",
+                "when": {
+                  "all": [
+                    "data.temp > '12'",
+                    "data.temp < '33'"
+                  ]
+                }
+              },
+              {
+                "type": "bignum",
+                "value": "{{data.temp}}°",
+                "size": "xlarge",
+                "when": "data.temp missing"
+              },
+              {
+                "type": "column",
+                "flex": 1,
+                "gap": 8,
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "{{params.district}}",
+                    "size": "large",
+                    "weight": "bold"
+                  },
+                  {
+                    "type": "text",
+                    "value": "濕度 {{data.humidity}}%",
+                    "size": "medium"
+                  },
+                  {
+                    "type": "text",
+                    "value": "天文台 {{data.updated|time_hhmm}} 更新",
+                    "size": "small"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "divider",
+            "when": { "any": ["data.warn_a", "data.warn_b"] }
+          },
+          {
+            "type": "column",
+            "when": { "any": ["data.warn_a", "data.warn_b"] },
+            "gap": 4,
+            "children": [
+              {
+                "type": "row",
+                "when": "data.w_tsunami == 'WTMW'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "alert", "size": "small", "color": "red" },
+                  { "type": "text", "value": "海嘯警告 Tsunami Warning", "size": "medium", "weight": "bold", "color": "red", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_tc == 'TC10'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "wind", "size": "small", "color": "red" },
+                  { "type": "text", "value": "十號颶風信號 No. 10 Hurricane Signal", "size": "medium", "weight": "bold", "color": "red", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_tc == 'TC9'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "wind", "size": "small", "color": "red" },
+                  { "type": "text", "value": "九號烈風或暴風風力增強信號 No. 9 Increasing Gale", "size": "medium", "weight": "bold", "color": "red", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": { "any": ["data.w_tc == 'TC8NE'", "data.w_tc == 'TC8SE'", "data.w_tc == 'TC8SW'", "data.w_tc == 'TC8NW'"] },
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "wind", "size": "small", "color": "red" },
+                  { "type": "text", "value": "八號烈風或暴風信號 No. 8 Gale or Storm", "size": "medium", "weight": "bold", "color": "red", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_tc == 'TC3'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "wind", "size": "small", "color": "black" },
+                  { "type": "text", "value": "三號強風信號 No. 3 Strong Wind Signal", "size": "medium", "weight": "bold", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_tc == 'TC1'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "wind", "size": "small", "color": "black" },
+                  { "type": "text", "value": "一號戒備信號 No. 1 Standby Signal", "size": "medium", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_rain == 'WRAINB'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "rain_heavy", "size": "small", "color": "black" },
+                  { "type": "text", "value": "黑色暴雨警告信號 Black Rainstorm Warning", "size": "medium", "weight": "bold", "color": "black", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_rain == 'WRAINR'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "rain_heavy", "size": "small", "color": "red" },
+                  { "type": "text", "value": "紅色暴雨警告信號 Red Rainstorm Warning", "size": "medium", "weight": "bold", "color": "red", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_rain == 'WRAINA'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "rain", "size": "small", "color": "yellow" },
+                  { "type": "text", "value": "黃色暴雨警告信號 Amber Rainstorm Warning", "size": "medium", "color": "yellow", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_ts == 'WTS'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "thunder", "size": "small", "color": "blue" },
+                  { "type": "text", "value": "雷暴警告 Thunderstorm Warning", "size": "medium", "color": "blue", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_landslip == 'WL'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "alert", "size": "small", "color": "black" },
+                  { "type": "text", "value": "山泥傾瀉警告 Landslip Warning", "size": "medium", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_flood == 'WFNTSA'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "rain", "size": "small", "color": "blue" },
+                  { "type": "text", "value": "新界北部水浸特別報告 Flooding, Northern NT", "size": "medium", "color": "blue", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_hot == 'WHOT'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "thermometer_hot", "size": "small", "color": "red" },
+                  { "type": "text", "value": "酷熱天氣警告 Very Hot Weather Warning", "size": "medium", "color": "red", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_cold == 'WCOLD'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "thermometer_cold", "size": "small", "color": "blue" },
+                  { "type": "text", "value": "寒冷天氣警告 Cold Weather Warning", "size": "medium", "color": "blue", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_monsoon == 'WMSGNL'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "wind", "size": "small", "color": "black" },
+                  { "type": "text", "value": "強烈季候風信號 Strong Monsoon Signal", "size": "medium", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_fire == 'WFIRER'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "alert", "size": "small", "color": "red" },
+                  { "type": "text", "value": "紅色火災危險警告 Red Fire Danger Warning", "size": "medium", "color": "red", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_fire == 'WFIREY'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "alert", "size": "small", "color": "yellow" },
+                  { "type": "text", "value": "黃色火災危險警告 Yellow Fire Danger Warning", "size": "medium", "color": "yellow", "flex": 1 }
+                ]
+              },
+              {
+                "type": "row",
+                "when": "data.w_frost == 'WFROST'",
+                "gap": 12,
+                "align": "center",
+                "children": [
+                  { "type": "icon", "name": "thermometer_cold", "size": "small", "color": "blue" },
+                  { "type": "text", "value": "霜凍警告 Frost Warning", "size": "medium", "color": "blue", "flex": 1 }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "spacer",
+            "flex": 1
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

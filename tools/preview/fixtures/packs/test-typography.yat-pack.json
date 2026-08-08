@@ -1,0 +1,142 @@
+{
+  "yat": 1,
+  "id": "test-typography",
+  "version": "1.0.0",
+  "name": {
+    "en": "Typography",
+    "zh-Hant": "字體測試"
+  },
+  "description": {
+    "en": "Exercises every face, weight and font fallback path.",
+    "zh-Hant": "測試所有字體大小與後備路徑。"
+  },
+  "aliases": {
+    "en": [
+      "typography test"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": []
+  },
+  "render": {
+    "chrome": "none",
+    "widgets": [
+      {
+        "type": "column",
+        "gap": 1,
+        "padding": [
+          4,
+          10,
+          4,
+          10
+        ],
+        "children": [
+          {
+            "type": "text",
+            "value": "小 16 Small 0123 觀塘天氣",
+            "size": "small"
+          },
+          {
+            "type": "text",
+            "value": "小粗 16 Bold 0123 觀塘天氣",
+            "size": "small",
+            "weight": "bold"
+          },
+          {
+            "type": "text",
+            "value": "中 24 Medium 觀塘天氣",
+            "size": "medium"
+          },
+          {
+            "type": "text",
+            "value": "中粗 24 Bold 觀塘天氣",
+            "size": "medium",
+            "weight": "bold"
+          },
+          {
+            "type": "text",
+            "value": "大 32 Large 觀塘",
+            "size": "large"
+          },
+          {
+            "type": "text",
+            "value": "大粗 32 Bold 觀塘",
+            "size": "large",
+            "weight": "bold"
+          },
+          {
+            "type": "text",
+            "value": "特大 48 XL 觀塘",
+            "size": "xlarge"
+          },
+          {
+            "type": "divider",
+            "thickness": 1
+          },
+          {
+            "type": "row",
+            "children": [
+              {
+                "type": "bignum",
+                "value": "08",
+                "size": "large"
+              },
+              {
+                "type": "spacer",
+                "size": 36
+              },
+              {
+                "type": "bignum",
+                "value": "-1.5°",
+                "size": "large",
+                "color": "red"
+              },
+              {
+                "type": "spacer",
+                "size": 36
+              },
+              {
+                "type": "bignum",
+                "value": "88%",
+                "size": "large"
+              }
+            ]
+          },
+          {
+            "type": "divider",
+            "thickness": 1
+          },
+          {
+            "type": "text",
+            "value": "Ellipsis: this single line is deliberately far too long to fit inside eight hundred pixels of panel width, so the engine must trim whole codepoints off the end and land the ellipsis inside the box.",
+            "size": "medium",
+            "max_lines": 1
+          },
+          {
+            "type": "text",
+            "value": "換行斷行測試：中文沒有空格所以引擎要逐字斷行，而拉丁文 wraps on spaces instead, and both must share one line box height across three lines of mixed script content here.",
+            "size": "small",
+            "max_lines": 3
+          },
+          {
+            "type": "text",
+            "value": "Tofu (no face covers these): ก ㄅ ﷲ",
+            "size": "medium"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

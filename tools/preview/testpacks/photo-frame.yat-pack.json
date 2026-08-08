@@ -1,0 +1,107 @@
+{
+  "yat": 1,
+  "id": "photo-frame",
+  "version": "1.0.0",
+  "name": {
+    "en": "Photo Frame",
+    "zh-Hant": "相框"
+  },
+  "description": {
+    "en": "The image escape hatch: point it at any https URL serving a PNG (a photo host, a chart generator, your own dashboard) and the device fetches, dithers, and displays it on schedule.",
+    "zh-Hant": "萬能相框：填入任何提供 PNG 嘅 https 網址（相片主機、圖表產生器、自製儀表板），裝置會定時擷取、抖色顯示。任何識得產生 800×404 PNG 嘅嘢，都可以變成一個 YAT 畫面，唔使寫程式。"
+  },
+  "aliases": {
+    "en": [
+      "photo",
+      "photo frame",
+      "picture"
+    ],
+    "zh-Hant": [
+      "相片",
+      "相框"
+    ],
+    "jyutping": [
+      "soeng1 pin2"
+    ]
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "image_url": {
+        "type": "string",
+        "title": {
+          "en": "Image URL",
+          "zh-Hant": "圖片網址"
+        },
+        "description": {
+          "en": "A web link (URL) to your picture. It must start with https:// and point straight at a .png image.",
+          "zh-Hant": "你張相嘅網址連結。要以https://開頭，直接連去一個.png圖片檔。"
+        },
+        "pattern": "^https://[a-z0-9][a-z0-9.-]*(/.*)?$",
+        "maxLength": 1024
+      },
+      "fit": {
+        "type": "string",
+        "title": {
+          "en": "Fit",
+          "zh-Hant": "顯示方式"
+        },
+        "description": {
+          "en": "Fit shows the whole picture with borders; stretch fills the frame but may distort it.",
+          "zh-Hant": "「縮放置中」會顯示成張相加邊框；「拉伸填滿」會填滿個畫面但可能會變形。"
+        },
+        "enum": [
+          "contain",
+          "stretch"
+        ],
+        "enum_titles": [
+          {
+            "en": "Fit (letterbox)",
+            "zh-Hant": "縮放置中"
+          },
+          {
+            "en": "Stretch (fill frame)",
+            "zh-Hant": "拉伸填滿"
+          }
+        ],
+        "default": "contain"
+      }
+    },
+    "required": [
+      "image_url",
+      "fit"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": []
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "image",
+        "src": "{{params.image_url}}",
+        "width": 800,
+        "height": 404,
+        "fit": "contain",
+        "dither": "floyd_steinberg",
+        "when": "params.fit == 'contain'"
+      },
+      {
+        "type": "image",
+        "src": "{{params.image_url}}",
+        "width": 800,
+        "height": 404,
+        "fit": "stretch",
+        "dither": "floyd_steinberg",
+        "when": "params.fit == 'stretch'"
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 360
+    }
+  }
+}

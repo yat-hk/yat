@@ -1,0 +1,1 @@
+1https://example.com/api?code={{each}}&owner={{params.owner}}

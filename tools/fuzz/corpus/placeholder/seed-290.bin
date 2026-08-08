@@ -1,0 +1,1 @@
+0{{params.date_2|date_diff_days}}

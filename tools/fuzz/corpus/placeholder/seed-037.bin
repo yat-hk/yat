@@ -1,0 +1,1 @@
+1data[?dir=='{{params.ctb_dir}}']|first(2)

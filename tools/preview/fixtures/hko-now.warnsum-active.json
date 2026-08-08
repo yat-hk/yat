@@ -1,0 +1,25 @@
+{
+  "WHOT": {
+    "name": "酷熱天氣警告",
+    "code": "WHOT",
+    "actionCode": "ISSUE",
+    "issueTime": "2026-07-27T06:45:00+08:00",
+    "updateTime": "2026-07-27T06:45:00+08:00"
+  },
+  "WTS": {
+    "name": "雷暴警告",
+    "code": "WTS",
+    "actionCode": "EXTEND",
+    "issueTime": "2026-07-27T15:20:00+08:00",
+    "expireTime": "2026-07-27T18:30:00+08:00",
+    "updateTime": "2026-07-27T16:45:00+08:00"
+  },
+  "WRAIN": {
+    "name": "暴雨警告信號",
+    "code": "WRAINA",
+    "type": "黃色",
+    "actionCode": "ISSUE",
+    "issueTime": "2026-07-27T16:40:00+08:00",
+    "updateTime": "2026-07-27T16:40:00+08:00"
+  }
+}

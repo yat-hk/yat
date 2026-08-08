@@ -1,0 +1,1 @@
+0匯率更新 {{data.updated|date_fmt('D/M')}} {{data.updated|time_hhmm}}

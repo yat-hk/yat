@@ -1,0 +1,89 @@
+{
+  "yat": 1,
+  "id": "test-sources-mini",
+  "name": {
+    "en": "sequential source references e"
+  },
+  "description": {
+    "en": "Purpose-built pack exercising §5.7 sequential source references: an inline first source's extracted field is substituted into a later https source's URL path/query. Not a real content pack."
+  },
+  "aliases": {
+    "en": [
+      "sources engine test"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "owner": {
+        "type": "string",
+        "title": "Owner",
+        "maxLength": 32,
+        "default": "K"
+      }
+    },
+    "required": [
+      "owner"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "first",
+        "type": "inline",
+        "data": {
+          "code": "AB12"
+        },
+        "extract": {
+          "code": "code"
+        }
+      },
+      {
+        "id": "second",
+        "type": "https",
+        "url": "https://example.com/api/{{sources.first.code}}?owner={{params.owner}}",
+        "format": "json",
+        "extract": {
+          "value": "value"
+        }
+      }
+    ]
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [
+          16,
+          24,
+          16,
+          24
+        ],
+        "gap": 4,
+        "children": [
+          {
+            "type": "text",
+            "value": "sources engine test",
+            "size": "medium",
+            "weight": "bold"
+          },
+          {
+            "type": "text",
+            "value": "{{data.code}}",
+            "size": "small"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

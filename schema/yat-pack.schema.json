@@ -1,0 +1,1081 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:yat:schema:pack:0.3-draft",
+  "title": "YAT Pack",
+  "description": "Machine contract for YAT content packs. Normative companion: docs/PACK-SPEC.md (Spec version 0.3-draft). Grammar strings (path expressions, placeholders, when, bind, for_each) are additionally parsed by the validator; schema patterns here are necessary but not sufficient. Placeholders AND document expressions are space-free canonical: '{{a|f(1)}}' and 'value|[0]|round(0)' — never '{{ a | f(1) }}' or 'value | [0]'.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["yat", "id", "name", "aliases", "params", "data", "render", "schedule"],
+  "properties": {
+    "yat": { "const": 1 },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "minLength": 3,
+      "maxLength": 48
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "min_firmware": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "name": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["en"],
+      "properties": {
+        "en": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "zh-Hant": { "type": "string", "minLength": 1, "maxLength": 32 }
+      }
+    },
+    "description": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["en"],
+      "properties": {
+        "en": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "zh-Hant": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    },
+    "aliases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["en", "zh-Hant", "jyutping"],
+      "properties": {
+        "en": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 32 }
+        },
+        "zh-Hant": { "$ref": "#/$defs/aliasList" },
+        "jyutping": { "$ref": "#/$defs/aliasList" }
+      }
+    },
+    "params": { "$ref": "#/$defs/paramsSchema" },
+    "secrets": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 4,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]{0,31}$": { "$ref": "#/$defs/secret" }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sources"],
+      "properties": {
+        "sources": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/source" },
+          "$comment": "≤8 source objects; the real budget is worst-case total fetches ≤8 [V] (PACK-SPEC §5, §5.1a). Later sources may reference earlier ones via {{sources.<id>.<field>}} (§5.7; validator-checked ordering)."
+        }
+      }
+    },
+    "compute": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 8,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]{0,31}$": { "$ref": "#/$defs/computeValue" }
+      },
+      "$comment": "Derived fields evaluated after extraction into data.* (PACK-SPEC §7.4). Names unique vs extract fields [V]; values may reference params/data(extracted)/now only; no compute-to-compute references [V]."
+    },
+    "strings": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 32,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]{0,31}$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["en", "zh-Hant"],
+          "properties": {
+            "en": { "type": "string", "minLength": 1, "maxLength": 200 },
+            "zh-Hant": { "type": "string", "minLength": 1, "maxLength": 200 }
+          }
+        }
+      },
+      "$comment": "Bilingual label table (PACK-SPEC §9.13). Requires render.lang_param [V]. Values ≤200 chars (sentence-length content fits)."
+    },
+    "render": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["widgets"],
+      "properties": {
+        "chrome": { "enum": ["standard", "none"], "default": "standard" },
+        "lang_param": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,31}$",
+          "$comment": "Names a params string enum whose enum is exactly ['en','zh','both'] [V]. Required when top-level strings is present [V]; may be declared without strings — it also drives the enum_title filter and weekday('auto') (PACK-SPEC §8.6, §8.13, §9.13)."
+        },
+        "widgets": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/widget" }
+        }
+      }
+    },
+    "schedule": { "$ref": "#/$defs/schedule" }
+  },
+  "dependentSchemas": {
+    "strings": { "properties": { "render": { "type": "object", "required": ["lang_param"] } } }
+  },
+  "$defs": {
+    "aliasList": {
+      "type": "array",
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 1, "maxLength": 32 }
+    },
+
+    "ink": { "enum": ["black", "white", "red", "yellow", "green", "blue"] },
+
+    "inkRole": {
+      "enum": ["accent", "good", "warn", "danger", "info", "muted"],
+      "$comment": "Semantic ink roles (PACK-SPEC §9.1a) — the RECOMMENDED spelling wherever a colour is accepted. Today: accent/danger=red, good=green, warn=yellow, info=blue, muted=black. A role says what a value means and lets the engine pick the ink, so the same pack renders honestly on a panel with a different palette."
+    },
+
+    "colorValue": {
+      "oneOf": [
+        { "$ref": "#/$defs/inkRole" },
+        { "$ref": "#/$defs/ink" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["param"],
+          "properties": {
+            "param": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$" }
+          },
+          "$comment": "Param form (PACK-SPEC §9.1): names a required-or-defaulted string enum param whose every enum member is a role name or an ink value [V]. Resolved once at install/load — deterministic."
+        }
+      ],
+      "$comment": "Role names and ink names are disjoint, so oneOf never matches twice."
+    },
+
+    "maxRows": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 20 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["param"],
+          "properties": {
+            "param": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$" }
+          },
+          "$comment": "Param form: names an integer param, required-or-defaulted, with minimum ≥1 and maximum ≤20 [V] (PACK-SPEC §9.8)."
+        }
+      ],
+      "default": 10
+    },
+
+    "padding": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "type": "integer", "minimum": 0, "maximum": 100 },
+      "$comment": "[top, right, bottom, left] — the only padding form (PACK-SPEC §9.4)."
+    },
+
+    "flex": { "type": "integer", "minimum": 1, "maximum": 10 },
+
+    "paramTitle": {
+      "oneOf": [
+        { "type": "string", "maxLength": 64 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["en"],
+          "properties": {
+            "en": { "type": "string", "minLength": 1, "maxLength": 64 },
+            "zh-Hant": { "type": "string", "minLength": 1, "maxLength": 64 }
+          }
+        }
+      ],
+      "$comment": "Gallery form label (PACK-SPEC §3.1). Plain string = legacy en-only form. Object shape mirrors enum_titles entries: en required, zh-Hant optional. Engine ignores this keyword entirely."
+    },
+
+    "paramDescription": {
+      "oneOf": [
+        { "type": "string", "maxLength": 200 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["en"],
+          "properties": {
+            "en": { "type": "string", "minLength": 1, "maxLength": 200 },
+            "zh-Hant": { "type": "string", "minLength": 1, "maxLength": 200 }
+          }
+        }
+      ],
+      "$comment": "Gallery form helper text (PACK-SPEC §3.1). Plain string = legacy en-only form. Object shape mirrors enum_titles entries: en required, zh-Hant optional. Engine ignores this keyword entirely."
+    },
+
+    "whenExprString": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 256,
+      "pattern": "^(?![\\s\\S]*\\{\\{ )(?![\\s\\S]*\\{\\{(secrets\\.|item[.\\[}]|each|strings\\.|index))(?![\\s\\S]*\\{\\{now\\}\\})(data|params|item|index)([.\\[ =!<>h][\\s\\S]*)?$",
+      "$comment": "One when-expression: context expr rooted at data/params/item, or bare index (list rows only [V], comparator required), with optional trailing comparator (== != < <= > >= has) + 'literal' or unary keyword (exists|missing). Ordering comparators numerically coerce fully-numeric string context values. Literals may embed {{params.*}}, bare-field {{data.<field>}}, and filtered {{now|...}} only (bare {{now}} forbidden); {{...}} spans lex atomically before quote scanning. Canonical spacing: one space around comparators/unary. Full grammar: PACK-SPEC §6.5."
+    },
+
+    "whenClause": {
+      "oneOf": [
+        { "$ref": "#/$defs/whenExprString" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "any": { "type": "array", "minItems": 2, "maxItems": 8, "items": { "$ref": "#/$defs/whenExprString" } }
+          },
+          "required": ["any"]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "all": { "type": "array", "minItems": 2, "maxItems": 8, "items": { "$ref": "#/$defs/whenExprString" } }
+          },
+          "required": ["all"]
+        }
+      ],
+      "$comment": "String = one when-expr; object = exactly one of any/all over 2–8 when-expr strings, one level (PACK-SPEC §6.5)."
+    },
+
+    "sourceWhenExprString": {
+      "type": "string",
+      "minLength": 7,
+      "maxLength": 256,
+      "pattern": "^(?![\\s\\S]*\\{\\{ )(?![\\s\\S]*\\{\\{(secrets\\.|data\\.|item|each|strings\\.|index|now|sources\\.))params[.\\[][\\s\\S]*$",
+      "$comment": "Source-level when: params-rooted only; literals may embed {{params.*}} only — never {{now|...}} (fetch decisions are time-independent; use schedule windows) and never {{data.*}}/{{sources.*}} (PACK-SPEC §5.0, §6.5). Unary exists/missing legal."
+    },
+
+    "sourceWhenClause": {
+      "oneOf": [
+        { "$ref": "#/$defs/sourceWhenExprString" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "any": { "type": "array", "minItems": 2, "maxItems": 8, "items": { "$ref": "#/$defs/sourceWhenExprString" } }
+          },
+          "required": ["any"]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "all": { "type": "array", "minItems": 2, "maxItems": 8, "items": { "$ref": "#/$defs/sourceWhenExprString" } }
+          },
+          "required": ["all"]
+        }
+      ]
+    },
+
+    "bindExpr": {
+      "type": "string",
+      "pattern": "^(data|params)\\.[a-z][a-z0-9_]{0,31}$"
+    },
+
+    "docPathExpr": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^(?![\\s\\S]*\\{\\{ )(?![\\s\\S]*\\{\\{(secrets\\.|data\\.|item|strings\\.|index))[\\s\\S]{1,256}$",
+      "$comment": "Document path expression (PACK-SPEC §6.1), SPACE-FREE outside quoted literals/members: 'value|[0]|round(0)', never 'value | [0]'. Embedded placeholders: filter literals take {{params.*}}, {{now}}, {{sources.<id>.<field>}} (later sources only) and — in for_each sources — {{each}}/{{each.prop}}; quoted-member steps take {{params.*}}/{{each...}} only (substituted before parse). Pipe stages: [n], length, first(n), last(n), round(n); first/last also accept a {{params.<int>}} arg (min ≥1, max ≤20 [V]). After a filter, member AND index steps project per-element. Fully parsed by the validator."
+    },
+
+    "templateString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?![\\s\\S]*\\{\\{ )(?![\\s\\S]*\\{\\{(secrets\\.|each|sources\\.))[\\s\\S]*$",
+      "$comment": "Render-context string: {{params.*}}, {{data.<field>...}} (dot/index steps allowed — render strings only), {{strings.*}}, {{item...}}/{{index}} (list rows only — validator-checked), {{now}}, plus filters. Never {{secrets.*}}, {{each}}, or {{sources.*}} (PACK-SPEC §7.1–7.2). Space-free placeholders."
+    },
+
+    "computeValue": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^(?![\\s\\S]*\\{\\{ )(?![\\s\\S]*\\{\\{(secrets\\.|item|each|strings\\.|index|sources\\.))[\\s\\S]*$",
+      "$comment": "Compute template: {{params.*}}, {{data.<field>}} (extracted fields only, bare — no steps [V]), {{now}}, plus filters (PACK-SPEC §7.4). Numeric compute fields must be when-tested with comparators, never bare truthiness (0 is falsy)."
+    },
+
+    "sourceString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![\\s\\S]*\\{\\{ )(?![\\s\\S]*\\{\\{(data\\.|item|strings\\.|index))[\\s\\S]*$",
+      "$comment": "Source-context string: {{params.*}}, {{secrets.*}} (bare), {{now}}, {{sources.<id>.<field>}} (earlier-declared plain sources only — validator-checked, PACK-SPEC §5.7), and (for_each sources only — validator-checked) {{each}}/{{each.prop}} (PACK-SPEC §7.2)."
+    },
+
+    "urlForms": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^https://[a-z0-9][a-z0-9.-]*([/?][^\\s]*)?$",
+          "$comment": "Form (a): literal scheme+host; placeholders only in path/query (PACK-SPEC §5.1)."
+        },
+        {
+          "type": "string",
+          "pattern": "^\\{\\{params\\.[a-z][a-z0-9_]{0,31}\\}\\}$",
+          "$comment": "Form (b): entire URL supplied by one string param; no secrets and no for_each allowed in such a source [V]."
+        }
+      ]
+    },
+
+    "sourceUrl": {
+      "allOf": [
+        { "$ref": "#/$defs/urlForms" },
+        { "$ref": "#/$defs/sourceString" },
+        { "type": "string", "maxLength": 1024 }
+      ]
+    },
+
+    "imageSrc": {
+      "allOf": [
+        { "$ref": "#/$defs/urlForms" },
+        {
+          "type": "string",
+          "maxLength": 1024,
+          "pattern": "^(?![\\s\\S]*\\{\\{ )(?![\\s\\S]*\\{\\{(secrets\\.|data\\.|item|each|strings\\.|index))[\\s\\S]*$",
+          "$comment": "image.src: {{params.*}} and {{now}} only — never secrets, data, item, each, or strings (PACK-SPEC §9.10, §12.3)."
+        }
+      ]
+    },
+
+    "extractMap": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 16,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]{0,31}$": { "$ref": "#/$defs/docPathExpr" }
+      },
+      "$comment": "Field names must additionally be unique across all sources and compute entries in the pack [V]."
+    },
+
+    "collectExtractMap": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 8,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]{0,31}$": { "$ref": "#/$defs/docPathExpr" }
+      },
+      "propertyNames": { "not": { "enum": ["each", "status"] } },
+      "$comment": "Per-iteration extraction for a for_each source; 'each' and 'status' are reserved and cannot be field names here (PACK-SPEC §5.1a rule 3, [V] enforced here via propertyNames and additionally by the engine at load with a named error)."
+    },
+
+    "source": {
+      "oneOf": [
+        { "$ref": "#/$defs/httpsSource" },
+        { "$ref": "#/$defs/inlineSource" }
+      ]
+    },
+
+    "httpsSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "url", "format"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$" },
+        "type": { "const": "https" },
+        "when": { "$ref": "#/$defs/sourceWhenClause" },
+        "url": { "$ref": "#/$defs/sourceUrl" },
+        "method": { "enum": ["GET", "POST"], "default": "GET" },
+        "headers": {
+          "type": "object",
+          "maxProperties": 8,
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[A-Za-z][A-Za-z0-9-]{0,63}$": {
+              "allOf": [
+                { "$ref": "#/$defs/sourceString" },
+                { "type": "string", "maxLength": 256 }
+              ]
+            }
+          },
+          "$comment": "Host and Content-Length are forbidden header names [V] (case-insensitive; PACK-SPEC §5.1)."
+        },
+        "body": {
+          "allOf": [
+            { "$ref": "#/$defs/sourceString" },
+            { "type": "string", "maxLength": 2048 }
+          ]
+        },
+        "format": { "enum": ["json", "rss", "csv"] },
+        "csv": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["has_header"],
+          "properties": {
+            "has_header": { "type": "boolean" }
+          }
+        },
+        "max_bytes": { "type": "integer", "minimum": 1024, "maximum": 524288, "default": 131072 },
+        "min_refresh_min": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 10080,
+          "$comment": "Minimum minutes between real fetches; within the interval last extracted fields are served fresh (PACK-SPEC §5.1). Absent → fetch every due wake."
+        },
+        "for_each": {
+          "type": "string",
+          "pattern": "^params\\.[a-z][a-z0-9_]{0,31}$",
+          "$comment": "Must name an array param with maxItems ≤8 [V]; worst-case total fetches per pack ≤8 [V] (PACK-SPEC §5.1a)."
+        },
+        "extract": { "$ref": "#/$defs/extractMap" },
+        "collect": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["field", "extract"],
+          "properties": {
+            "field": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$" },
+            "extract": { "$ref": "#/$defs/collectExtractMap" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["body"] },
+          "then": {
+            "required": ["method"],
+            "properties": { "method": { "const": "POST" } }
+          }
+        },
+        {
+          "if": { "properties": { "format": { "const": "csv" } }, "required": ["format"] },
+          "then": { "required": ["csv"] },
+          "else": { "not": { "required": ["csv"] } }
+        },
+        {
+          "if": { "required": ["for_each"] },
+          "then": { "required": ["collect"], "not": { "required": ["extract"] } },
+          "else": { "required": ["extract"], "not": { "required": ["collect"] } }
+        }
+      ]
+    },
+
+    "inlineSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "data", "extract"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$" },
+        "type": { "const": "inline" },
+        "when": { "$ref": "#/$defs/sourceWhenClause" },
+        "data": {
+          "type": "object",
+          "$comment": "Must be a JSON object (never a bare array/scalar). ≤8192 bytes serialized [V]. Content is inert — no placeholder substitution (PACK-SPEC §5.2). for_each/collect are not legal on inline sources."
+        },
+        "extract": { "$ref": "#/$defs/extractMap" }
+      }
+    },
+
+    "paramsSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "properties", "additionalProperties"],
+      "properties": {
+        "type": { "const": "object" },
+        "properties": {
+          "type": "object",
+          "maxProperties": 12,
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[a-z][a-z0-9_]{0,31}$": { "$ref": "#/$defs/paramProperty" }
+          }
+        },
+        "required": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$" }
+        },
+        "additionalProperties": { "const": false }
+      }
+    },
+
+    "paramProperty": {
+      "oneOf": [
+        { "$ref": "#/$defs/scalarParam" },
+        { "$ref": "#/$defs/arrayParam" }
+      ]
+    },
+
+    "scalarParam": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["string", "number", "integer", "boolean"] },
+        "title": { "$ref": "#/$defs/paramTitle" },
+        "description": { "$ref": "#/$defs/paramDescription" },
+        "x-picker": {
+          "enum": ["kmb-stop", "ctb-stop", "mtr-station", "gmb"],
+          "$comment": "Gallery-only hint: render a live transport search widget for this param instead of a text box (the website's pack-picker.js, private codebase). Engine ignores it entirely — pure authoring metadata, like enum_titles."
+        },
+        "x-derived-from": {
+          "type": "string",
+          "$comment": "Gallery-only hint naming the sibling param whose picker fills this field: the form locks it against hand-editing (the website's pack-form.js, private codebase). Engine ignores it entirely."
+        },
+        "default": {
+          "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }],
+          "$comment": "Must itself satisfy this property's full constraint set, and be a member of enum when enum is present [V] (PACK-SPEC §3.3(4))."
+        },
+        "enum": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": { "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }] },
+          "$comment": "Every member must satisfy the property's constraint set [V]."
+        },
+        "enum_titles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["en"],
+            "properties": {
+              "en": { "type": "string", "minLength": 1, "maxLength": 64 },
+              "zh-Hant": { "type": "string", "minLength": 1, "maxLength": 64 }
+            }
+          },
+          "$comment": "Display labels; same length as enum [V]. Gallery form shows titles, stores values; at render reachable only via the enum_title filter (PACK-SPEC §3.1, §8.13)."
+        },
+        "format": { "const": "date", "$comment": "string type only [V]; gallery renders a date picker; engine treats as ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ (PACK-SPEC §3.1)." },
+        "depends_on": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$", "$comment": "Gallery-only: names a boolean param of this pack [V]; engine ignores (PACK-SPEC §3.1)." },
+        "implies": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 4,
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[a-z][a-z0-9_]{0,31}$": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 50,
+              "additionalProperties": { "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }] }
+            }
+          },
+          "$comment": "Gallery-only cross-param constraint (PACK-SPEC §3.1): requires enum on this param [V]; each inner map's keys are string forms of this param's enum members [V]; outer keys name enum params of this pack and each forced value is a member of that target's enum [V]. The form auto-sets and locks targets; the engine ignores this keyword."
+        },
+        "minimum": { "type": "number" },
+        "maximum": { "type": "number" },
+        "minLength": { "type": "integer", "minimum": 0 },
+        "maxLength": { "type": "integer", "minimum": 0 },
+        "pattern": { "type": "string", "maxLength": 200 }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["enum_titles"] },
+          "then": { "required": ["enum"] }
+        },
+        {
+          "if": { "required": ["format"] },
+          "then": { "properties": { "type": { "const": "string" } } }
+        },
+        {
+          "if": { "required": ["implies"] },
+          "then": { "required": ["enum"] }
+        }
+      ]
+    },
+
+    "itemScalarParam": {
+      "allOf": [
+        { "$ref": "#/$defs/scalarParam" },
+        { "not": { "type": "object", "required": ["default"] } },
+        { "not": { "type": "object", "required": ["depends_on"] } },
+        { "not": { "type": "object", "required": ["implies"] } }
+      ],
+      "$comment": "Scalar item schema of an array param: the §3.1 keyword set minus default, depends_on, implies (PACK-SPEC §3.2)."
+    },
+
+    "objectPropParam": {
+      "allOf": [
+        { "$ref": "#/$defs/scalarParam" },
+        { "not": { "type": "object", "required": ["depends_on"] } },
+        { "not": { "type": "object", "required": ["implies"] } }
+      ],
+      "$comment": "Property of a flat-object array item: the §3.1 keyword set minus depends_on, implies. Per-property default IS legal — omitted optional item properties with a default are materialized per element; a referenced item property must be required-or-defaulted [V] (PACK-SPEC §3.2, §3.3(5))."
+    },
+
+    "arrayParam": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "items", "maxItems"],
+      "properties": {
+        "type": { "const": "array" },
+        "title": { "$ref": "#/$defs/paramTitle" },
+        "description": { "$ref": "#/$defs/paramDescription" },
+        "items": {
+          "oneOf": [
+            { "$ref": "#/$defs/itemScalarParam" },
+            { "$ref": "#/$defs/flatObjectParam" }
+          ]
+        },
+        "minItems": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "maxItems": { "type": "integer", "minimum": 1, "maximum": 20, "$comment": "≤8 when this param is referenced by a for_each [V] (PACK-SPEC §5.1a)." },
+        "uniqueItems": { "const": true, "$comment": "Only the literal true; omit rather than write false (PACK-SPEC §3.2)." },
+        "depends_on": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$", "$comment": "Gallery-only: names a boolean param of this pack [V]; engine ignores (PACK-SPEC §3.2)." },
+        "default": { "type": "array", "$comment": "Must validate against items, minItems/maxItems, and uniqueItems [V] (PACK-SPEC §3.3)." }
+      }
+    },
+
+    "flatObjectParam": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "properties", "additionalProperties"],
+      "properties": {
+        "type": { "const": "object" },
+        "title": { "$ref": "#/$defs/paramTitle" },
+        "description": { "$ref": "#/$defs/paramDescription" },
+        "properties": {
+          "type": "object",
+          "maxProperties": 8,
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[a-z][a-z0-9_]{0,31}$": { "$ref": "#/$defs/objectPropParam" }
+          }
+        },
+        "required": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$" }
+        },
+        "additionalProperties": { "const": false }
+      }
+    },
+
+    "secret": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hint", "sent_to"],
+      "properties": {
+        "hint": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "sent_to": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 253,
+            "pattern": "^(\\*\\.)?([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,24}$",
+            "$comment": "Exact FQDN or *.domain wildcard — the only two forms (PACK-SPEC §4)."
+          }
+        }
+      }
+    },
+
+    "schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default"],
+      "properties": {
+        "default": { "$ref": "#/$defs/cadence" },
+        "windows": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/window" }
+        }
+      }
+    },
+
+    "cadence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["every_min"],
+      "properties": {
+        "every_min": { "type": "integer", "minimum": 5, "maximum": 1440 }
+      }
+    },
+
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["days", "from", "to", "every_min"],
+      "properties": {
+        "days": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 7,
+          "uniqueItems": true,
+          "items": { "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] }
+        },
+        "from": { "$ref": "#/$defs/hhmm" },
+        "to": { "$ref": "#/$defs/hhmm", "$comment": "from < to required [V]; no cross-midnight windows in v1 (PACK-SPEC §10)." },
+        "every_min": { "type": "integer", "minimum": 5, "maximum": 1440 }
+      }
+    },
+
+    "hhmm": {
+      "type": "string",
+      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+    },
+
+    "widget": {
+      "oneOf": [
+        { "$ref": "#/$defs/columnWidget" },
+        { "$ref": "#/$defs/rowWidget" },
+        { "$ref": "#/$defs/spacerWidget" },
+        { "$ref": "#/$defs/dividerWidget" },
+        { "$ref": "#/$defs/textWidget" },
+        { "$ref": "#/$defs/bignumWidget" },
+        { "$ref": "#/$defs/listWidget" },
+        { "$ref": "#/$defs/iconWidget" },
+        { "$ref": "#/$defs/imageWidget" },
+        { "$ref": "#/$defs/qrWidget" },
+        { "$ref": "#/$defs/barWidget" },
+        { "$ref": "#/$defs/chartWidget" }
+      ]
+    },
+
+    "outerRowTemplateWidget": {
+      "oneOf": [
+        { "$ref": "#/$defs/rowTemplateWidget" },
+        { "$ref": "#/$defs/nestedListWidget" }
+      ],
+      "$comment": "Element set of a top-level list's row array: everything except list, plus — as a DIRECT element only — one nested list (PACK-SPEC §9.8a)."
+    },
+
+    "nestedListWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "bind", "row"],
+      "properties": {
+        "type": { "const": "list" },
+        "bind": {
+          "type": "string",
+          "pattern": "^item\\.[a-z][a-z0-9_]{0,31}$",
+          "$comment": "item.<prop>, where <prop> is a collect.extract field of the for_each source the OUTER list is bound to [V] (PACK-SPEC §9.8a). Outer list must be bound to a collect.field [V]."
+        },
+        "row": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/rowTemplateWidget" }
+        },
+        "max_rows": { "$ref": "#/$defs/maxRows" },
+        "gap": { "type": "integer", "minimum": 0, "maximum": 40, "default": 4 },
+        "empty_text": {
+          "allOf": [
+            { "$ref": "#/$defs/templateString" },
+            { "type": "string", "maxLength": 200 }
+          ]
+        },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      },
+      "$comment": "Nested list (PACK-SPEC §9.8a): row items exclude list (no third level); item/index rebind to the inner element; outer max_rows × nested max_rows ≤ 40 [V]."
+    },
+
+    "rowTemplateWidget": {
+      "$comment": "Widget set legal inside nested-list rows and inside column/row containers within any list row: everything except list (PACK-SPEC §9.8/§9.8a — a nested list is legal only as a direct element of a top-level list's row; see outerRowTemplateWidget).",
+      "oneOf": [
+        { "$ref": "#/$defs/columnInRowTemplate" },
+        { "$ref": "#/$defs/rowInRowTemplate" },
+        { "$ref": "#/$defs/spacerWidget" },
+        { "$ref": "#/$defs/dividerWidget" },
+        { "$ref": "#/$defs/textWidget" },
+        { "$ref": "#/$defs/bignumWidget" },
+        { "$ref": "#/$defs/iconWidget" },
+        { "$ref": "#/$defs/imageWidget" },
+        { "$ref": "#/$defs/qrWidget" },
+        { "$ref": "#/$defs/barWidget" }
+      ]
+    },
+
+    "columnWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "column" },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/widget" }
+        },
+        "gap": { "type": "integer", "minimum": 0, "maximum": 100, "default": 0 },
+        "padding": { "$ref": "#/$defs/padding" },
+        "align": { "enum": ["start", "center", "end", "stretch"], "default": "stretch" },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "rowWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "row" },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/widget" }
+        },
+        "gap": { "type": "integer", "minimum": 0, "maximum": 100, "default": 0 },
+        "padding": { "$ref": "#/$defs/padding" },
+        "align": { "enum": ["start", "center", "end"], "default": "center" },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "columnInRowTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "column" },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/rowTemplateWidget" }
+        },
+        "gap": { "type": "integer", "minimum": 0, "maximum": 100, "default": 0 },
+        "padding": { "$ref": "#/$defs/padding" },
+        "align": { "enum": ["start", "center", "end", "stretch"], "default": "stretch" },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "rowInRowTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "row" },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/rowTemplateWidget" }
+        },
+        "gap": { "type": "integer", "minimum": 0, "maximum": 100, "default": 0 },
+        "padding": { "$ref": "#/$defs/padding" },
+        "align": { "enum": ["start", "center", "end"], "default": "center" },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "spacerWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "spacer" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 480 },
+        "flex": { "$ref": "#/$defs/flex" },
+        "when": { "$ref": "#/$defs/whenClause" }
+      },
+      "oneOf": [
+        { "required": ["size"], "not": { "required": ["flex"] } },
+        { "required": ["flex"], "not": { "required": ["size"] } }
+      ]
+    },
+
+    "dividerWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "divider" },
+        "thickness": { "type": "integer", "minimum": 1, "maximum": 8, "default": 1 },
+        "color": { "$ref": "#/$defs/colorValue", "default": "black" },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "textWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "text" },
+        "value": { "$ref": "#/$defs/templateString" },
+        "size": { "enum": ["small", "medium", "large", "xlarge"], "default": "medium" },
+        "weight": { "enum": ["regular", "bold"], "default": "regular" },
+        "align": { "enum": ["left", "center", "right"], "default": "left" },
+        "color": { "$ref": "#/$defs/colorValue", "default": "black" },
+        "max_lines": { "type": "integer", "minimum": 1, "maximum": 10, "default": 1 },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "bignumWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "bignum" },
+        "value": {
+          "allOf": [
+            { "$ref": "#/$defs/templateString" },
+            { "type": "string", "maxLength": 64 }
+          ]
+        },
+        "size": { "enum": ["large", "xlarge"], "default": "large" },
+        "align": { "enum": ["left", "center", "right"], "default": "left" },
+        "color": { "$ref": "#/$defs/colorValue", "default": "black" },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "listWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "bind", "row"],
+      "properties": {
+        "type": { "const": "list" },
+        "bind": { "$ref": "#/$defs/bindExpr" },
+        "row": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/outerRowTemplateWidget" }
+        },
+        "max_rows": { "$ref": "#/$defs/maxRows" },
+        "gap": { "type": "integer", "minimum": 0, "maximum": 40, "default": 4 },
+        "empty_text": {
+          "allOf": [
+            { "$ref": "#/$defs/templateString" },
+            { "type": "string", "maxLength": 200 }
+          ],
+          "$comment": "Rendered only for a genuinely empty bound array. E_BIND (non-array bind target) renders NOTHING + footer glyph (PACK-SPEC §9.8, §11.3)."
+        },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "iconWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name"],
+      "properties": {
+        "type": { "const": "icon" },
+        "name": {
+          "enum": [
+            "sun", "moon", "cloud", "cloud_sun", "cloud_moon", "rain", "rain_heavy",
+            "drizzle", "thunder", "fog", "wind", "humidity", "thermometer_hot",
+            "thermometer_cold", "bus", "minibus", "train", "tram", "ferry", "clock",
+            "calendar", "alert", "info", "check", "cross", "arrow_up", "arrow_down",
+            "arrow_right", "battery", "wifi", "location", "star"
+          ],
+          "$comment": "Closed v1 catalog (PACK-SPEC §9.9). Official HK warning-signal glyphs are firmware-reserved and deliberately absent."
+        },
+        "size": { "enum": ["small", "medium", "large"], "default": "medium" },
+        "color": { "$ref": "#/$defs/colorValue", "default": "black" },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "imageWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "src", "width", "height"],
+      "properties": {
+        "type": { "const": "image" },
+        "src": { "$ref": "#/$defs/imageSrc" },
+        "width": { "type": "integer", "minimum": 1, "maximum": 800 },
+        "height": { "type": "integer", "minimum": 1, "maximum": 480 },
+        "fit": { "enum": ["contain", "cover", "stretch"], "default": "contain" },
+        "dither": { "enum": ["floyd_steinberg", "none"], "default": "floyd_steinberg" },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      },
+      "$comment": "≤2 image widgets per pack [V]; PNG only; ≤204800 bytes; source ≤800×480 px (PACK-SPEC §9.10)."
+    },
+
+    "qrWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "qr" },
+        "value": {
+          "allOf": [
+            { "$ref": "#/$defs/templateString" },
+            { "type": "string", "maxLength": 512 }
+          ]
+        },
+        "size": { "type": "integer", "minimum": 64, "maximum": 240, "default": 120 },
+        "ecc": { "enum": ["L", "M", "Q", "H"], "default": "M" },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "barBound": {
+      "oneOf": [
+        { "type": "number" },
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^(?![\\s\\S]*\\{\\{ )(?![\\s\\S]*\\{\\{(secrets\\.|data\\.|item|each|strings\\.|index|now))[\\s\\S]*$",
+          "$comment": "Template form: {{params.*}} placeholders only; must substitute to a number at render (PACK-SPEC §9.12)."
+        }
+      ]
+    },
+
+    "barWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value", "min", "max"],
+      "properties": {
+        "type": { "const": "bar" },
+        "value": { "$ref": "#/$defs/templateString" },
+        "min": { "$ref": "#/$defs/barBound" },
+        "max": { "$ref": "#/$defs/barBound", "$comment": "Literal numbers: max > min required [V]; param-templated bounds are evaluated against installed/defaulted values at install/load and max ≤ min is rejected [V] (PACK-SPEC §9.12)." },
+        "height": { "type": "integer", "minimum": 4, "maximum": 48, "default": 12 },
+        "color": { "$ref": "#/$defs/colorValue", "default": "black" },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    },
+
+    "chartWidget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "bind"],
+      "properties": {
+        "type": { "const": "chart" },
+        "mode": { "enum": ["line"], "default": "line" },
+        "bind": { "$ref": "#/$defs/bindExpr", "$comment": "Array of numbers (or numeric strings); non-numeric elements are gaps the line breaks across (PACK-SPEC §9.12a)." },
+        "min": { "$ref": "#/$defs/barBound" },
+        "max": { "$ref": "#/$defs/barBound", "$comment": "Omit both min and max to auto-scale to the series' own range; supplying only one, or max <= min, also auto-scales (PACK-SPEC §9.12a)." },
+        "height": { "type": "integer", "minimum": 24, "maximum": 400, "default": 96 },
+        "dots": { "type": "boolean", "default": false },
+        "color": { "$ref": "#/$defs/colorValue", "default": "black" },
+        "show_bounds": { "type": "boolean", "default": false, "$comment": "Draw the resolved min/max (pinned or auto-scaled) as small muted labels at the box's top-left/bottom-left corners (PACK-SPEC §9.12a)." },
+        "when": { "$ref": "#/$defs/whenClause" },
+        "flex": { "$ref": "#/$defs/flex" }
+      }
+    }
+  }
+}

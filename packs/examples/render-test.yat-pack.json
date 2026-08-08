@@ -1,0 +1,470 @@
+{
+  "yat": 1,
+  "id": "render-test",
+  "version": "0.2.0",
+  "name": {
+    "en": "Render Test",
+    "zh-Hant": "渲染測試"
+  },
+  "description": {
+    "en": "Engine conformance page: lists over object/array/scalar element types, item and index placeholders, the strings table, enum_title, pick_by_day and sign_char.",
+    "zh-Hant": "引擎測試頁：列表、item 同 index 佔位符、字串表、enum_title、pick_by_day 同 sign_char。"
+  },
+  "aliases": {
+    "en": [
+      "render test",
+      "engine test"
+    ],
+    "zh-Hant": [
+      "渲染測試"
+    ],
+    "jyutping": [
+      "wan4 jim5 cak1 si3"
+    ]
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "lang": {
+        "type": "string",
+        "title": {
+          "en": "Language",
+          "zh-Hant": "語言"
+        },
+        "description": {
+          "en": "Label language for the strings table.",
+          "zh-Hant": "字串表用嘅語言。"
+        },
+        "enum": [
+          "en",
+          "zh",
+          "both"
+        ],
+        "enum_titles": [
+          {
+            "en": "English"
+          },
+          {
+            "en": "Chinese",
+            "zh-Hant": "中文"
+          },
+          {
+            "en": "Bilingual",
+            "zh-Hant": "雙語"
+          }
+        ],
+        "default": "both"
+      },
+      "market": {
+        "type": "string",
+        "title": {
+          "en": "Market",
+          "zh-Hant": "市場"
+        },
+        "description": {
+          "en": "Which market's board to show.",
+          "zh-Hant": "想顯示邊個市場嘅板。"
+        },
+        "enum": [
+          "hk",
+          "us",
+          "jp"
+        ],
+        "enum_titles": [
+          {
+            "en": "Hong Kong",
+            "zh-Hant": "香港"
+          },
+          {
+            "en": "United States",
+            "zh-Hant": "美國"
+          },
+          {
+            "en": "Japan",
+            "zh-Hant": "日本"
+          }
+        ],
+        "default": "hk"
+      },
+      "rows_shown": {
+        "type": "integer",
+        "title": {
+          "en": "Movers shown",
+          "zh-Hant": "顯示幾多行"
+        },
+        "description": {
+          "en": "How many mover rows to draw.",
+          "zh-Hant": "顯示幾多行升跌。"
+        },
+        "minimum": 1,
+        "maximum": 20,
+        "default": 3
+      },
+      "tips": {
+        "type": "array",
+        "title": {
+          "en": "Tip pool",
+          "zh-Hant": "提示庫"
+        },
+        "description": {
+          "en": "One line is shown per day, in order.",
+          "zh-Hant": "每日按次序顯示一句。"
+        },
+        "minItems": 1,
+        "maxItems": 20,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "default": [
+          "One figure per page beats five.",
+          "白紙都好過亂七八糟。",
+          "Measure twice, refresh once.",
+          "Calm is a feature."
+        ]
+      }
+    },
+    "required": [
+      "lang",
+      "market",
+      "rows_shown"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "board",
+        "type": "inline",
+        "data": {
+          "movers": [
+            {
+              "name": "Harbour Rail",
+              "delta": 3.75
+            },
+            {
+              "name": "Kowloon Power",
+              "delta": -1.2
+            },
+            {
+              "name": "Star Ferry Co",
+              "delta": 0
+            },
+            {
+              "name": "Peak Holdings",
+              "delta": 12.5
+            }
+          ],
+          "grid": [
+            [
+              "週一 Mon",
+              "07:20",
+              "沙田 Sha Tin"
+            ],
+            [
+              "週二 Tue",
+              "07:35",
+              "大圍 Tai Wai"
+            ],
+            [
+              "週三 Wed",
+              "07:05",
+              "九龍塘 Kln Tong"
+            ]
+          ],
+          "tags": [
+            "ferry",
+            "tram",
+            "minibus"
+          ],
+          "empty": [],
+          "scalar": "not an array"
+        },
+        "extract": {
+          "movers": "movers",
+          "grid": "grid",
+          "tags": "tags",
+          "empty_pool": "empty",
+          "not_a_list": "scalar"
+        }
+      }
+    ]
+  },
+  "strings": {
+    "title": {
+      "en": "Render Test",
+      "zh-Hant": "渲染測試"
+    },
+    "movers_hdr": {
+      "en": "Movers",
+      "zh-Hant": "升跌"
+    },
+    "grid_hdr": {
+      "en": "Rota",
+      "zh-Hant": "輪值"
+    },
+    "tags_hdr": {
+      "en": "Modes",
+      "zh-Hant": "交通"
+    },
+    "empty_hint": {
+      "en": "Pool is empty",
+      "zh-Hant": "未有資料"
+    },
+    "footnote": {
+      "en": "Two texts, one row",
+      "zh-Hant": "兩段文字一行"
+    }
+  },
+  "render": {
+    "chrome": "standard",
+    "lang_param": "lang",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [
+          8,
+          20,
+          6,
+          20
+        ],
+        "gap": 4,
+        "children": [
+          {
+            "type": "row",
+            "gap": 8,
+            "align": "center",
+            "children": [
+              {
+                "type": "text",
+                "value": "{{strings.title}}",
+                "size": "large",
+                "weight": "bold"
+              },
+              {
+                "type": "spacer",
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "value": "{{params.market|enum_title('market')}}",
+                "size": "small",
+                "align": "right"
+              }
+            ]
+          },
+          {
+            "type": "divider",
+            "thickness": 1
+          },
+          {
+            "type": "row",
+            "gap": 16,
+            "align": "start",
+            "children": [
+              {
+                "type": "column",
+                "flex": 1,
+                "gap": 4,
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "{{strings.movers_hdr}}",
+                    "size": "small",
+                    "weight": "bold"
+                  },
+                  {
+                    "type": "list",
+                    "bind": "data.movers",
+                    "max_rows": {
+                      "param": "rows_shown"
+                    },
+                    "gap": 4,
+                    "row": [
+                      {
+                        "type": "row",
+                        "gap": 8,
+                        "align": "center",
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "{{index}}.",
+                            "size": "small"
+                          },
+                          {
+                            "type": "text",
+                            "value": "{{item.name}}",
+                            "size": "small",
+                            "weight": "bold",
+                            "flex": 1
+                          },
+                          {
+                            "type": "text",
+                            "value": "top",
+                            "size": "small",
+                            "color": "green",
+                            "when": "index == '1'"
+                          },
+                          {
+                            "type": "text",
+                            "value": "{{item.delta|sign_char}}{{item.delta|abs|round(1)}}%",
+                            "size": "small",
+                            "align": "right",
+                            "color": "red",
+                            "when": "item.delta > '0'"
+                          },
+                          {
+                            "type": "text",
+                            "value": "{{item.delta|sign_char}}{{item.delta|abs|round(1)}}%",
+                            "size": "small",
+                            "align": "right",
+                            "color": "blue",
+                            "when": "item.delta <= '0'"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "column",
+                "gap": 4,
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "{{strings.grid_hdr}}",
+                    "size": "small",
+                    "weight": "bold"
+                  },
+                  {
+                    "type": "list",
+                    "bind": "data.grid",
+                    "max_rows": 3,
+                    "gap": 2,
+                    "row": [
+                      {
+                        "type": "row",
+                        "gap": 8,
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": "{{item[0]}}",
+                            "size": "small",
+                            "weight": "bold"
+                          },
+                          {
+                            "type": "text",
+                            "value": "{{item[1]}}",
+                            "size": "small"
+                          },
+                          {
+                            "type": "text",
+                            "value": "{{item[-1]}}",
+                            "size": "small"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "divider",
+            "thickness": 1
+          },
+          {
+            "type": "row",
+            "gap": 8,
+            "align": "start",
+            "children": [
+              {
+                "type": "text",
+                "value": "{{strings.tags_hdr}}",
+                "size": "small",
+                "weight": "bold"
+              },
+              {
+                "type": "list",
+                "bind": "data.tags",
+                "max_rows": 3,
+                "gap": 2,
+                "row": [
+                  {
+                    "type": "text",
+                    "value": "{{index}}) {{item}}",
+                    "size": "small"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "list",
+            "bind": "data.empty_pool",
+            "gap": 2,
+            "empty_text": "{{strings.empty_hint}}",
+            "row": [
+              {
+                "type": "text",
+                "value": "{{item}}",
+                "size": "small"
+              }
+            ]
+          },
+          {
+            "type": "list",
+            "bind": "data.not_a_list",
+            "gap": 2,
+            "empty_text": "never shown - E_BIND renders nothing",
+            "row": [
+              {
+                "type": "text",
+                "value": "{{item}}",
+                "size": "small"
+              }
+            ]
+          },
+          {
+            "type": "spacer",
+            "flex": 1
+          },
+          {
+            "type": "row",
+            "gap": 12,
+            "align": "center",
+            "children": [
+              {
+                "type": "text",
+                "value": "{{strings.footnote}}",
+                "size": "small"
+              },
+              {
+                "type": "text",
+                "value": "{{now|date_fmt('D/M')}} {{now|weekday('auto')}}",
+                "size": "small"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": "{{params.tips|pick_by_day}}",
+            "size": "small",
+            "align": "center",
+            "color": "blue",
+            "max_lines": 1
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

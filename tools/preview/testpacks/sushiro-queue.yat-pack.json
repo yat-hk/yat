@@ -1,0 +1,400 @@
+{
+  "yat": 1,
+  "id": "sushiro-queue",
+  "version": "1.1.0",
+  "name": {
+    "en": "Sushiro Queues",
+    "zh-Hant": "壽司郎排隊"
+  },
+  "description": {
+    "en": "Live wait times for the Sushiro branches nearest you, with optional now-calling ticket numbers for your favourite branch.",
+    "zh-Hant": "顯示最近幾間壽司郎分店嘅實時等候時間，可選擇顯示常去分店嘅叫號。"
+  },
+  "aliases": {
+    "en": [
+      "sushiro",
+      "sushi queue"
+    ],
+    "zh-Hant": [
+      "壽司郎",
+      "壽司郎排隊"
+    ],
+    "jyutping": [
+      "sau6 si1 long4"
+    ]
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "latitude": {
+        "type": "number",
+        "title": {
+          "en": "Latitude",
+          "zh-Hant": "緯度"
+        },
+        "description": {
+          "en": "Used to work out your \"nearest branches\" — if unsure, just leave the default (central Kowloon).",
+          "zh-Hant": "用嚟計邊幾間係你「最近嘅分店」——唔識填就照用預設（九龍中心）。"
+        },
+        "minimum": 22.1,
+        "maximum": 22.6,
+        "default": 22.302
+      },
+      "longitude": {
+        "type": "number",
+        "title": {
+          "en": "Longitude",
+          "zh-Hant": "經度"
+        },
+        "description": {
+          "en": "Works together with latitude above. If unsure, just leave the default (central Kowloon).",
+          "zh-Hant": "同上面嘅緯度一齊用嚟定位。唔識填就照用預設（九龍中心）。"
+        },
+        "minimum": 113.8,
+        "maximum": 114.5,
+        "default": 114.177
+      },
+      "n": {
+        "type": "integer",
+        "title": {
+          "en": "Branches shown",
+          "zh-Hant": "顯示幾多間分店"
+        },
+        "description": {
+          "en": "How many nearby branches to list.",
+          "zh-Hant": "顯示幾多間附近嘅分店。"
+        },
+        "minimum": 3,
+        "maximum": 10,
+        "default": 5
+      },
+      "show_calling": {
+        "type": "boolean",
+        "title": {
+          "en": "Show now-calling numbers",
+          "zh-Hant": "顯示現正叫嘅號碼"
+        },
+        "description": {
+          "en": "Also show the ticket numbers being called right now at your favourite branch.",
+          "zh-Hant": "同時顯示你常去嗰間分店而家叫緊嘅號碼。"
+        },
+        "default": false
+      },
+      "fav_store": {
+        "type": "string",
+        "title": {
+          "en": "Favourite branch",
+          "zh-Hant": "常去分店"
+        },
+        "description": {
+          "en": "Pick the branch whose now-calling numbers you want to see.",
+          "zh-Hant": "揀你想睇叫號嘅分店。"
+        },
+        "enum": [
+          "22",
+          "14",
+          "2",
+          "10",
+          "43",
+          "30",
+          "8",
+          "18"
+        ],
+        "enum_titles": [
+          {
+            "en": "Tsim Sha Tsui Granville Road",
+            "zh-Hant": "尖沙咀加連威老道店"
+          },
+          {
+            "en": "Jordan JD Mall",
+            "zh-Hant": "佐敦薈店"
+          },
+          {
+            "en": "Whampoa Deli Place",
+            "zh-Hant": "黃埔享膳坊店"
+          },
+          {
+            "en": "Mong Kok",
+            "zh-Hant": "旺角店"
+          },
+          {
+            "en": "Whampoa Fashion World",
+            "zh-Hant": "黃埔時尚坊店"
+          },
+          {
+            "en": "Olympian City 2",
+            "zh-Hant": "奧海城2期店"
+          },
+          {
+            "en": "Sheung Wan",
+            "zh-Hant": "上環店"
+          },
+          {
+            "en": "Causeway Bay Plaza 2",
+            "zh-Hant": "銅鑼灣廣場2期店"
+          }
+        ],
+        "default": "10",
+        "depends_on": "show_calling"
+      },
+      "lang": {
+        "type": "string",
+        "title": {
+          "en": "Language",
+          "zh-Hant": "語言"
+        },
+        "enum": [
+          "en",
+          "zh",
+          "both"
+        ],
+        "enum_titles": [
+          {
+            "en": "English"
+          },
+          {
+            "en": "Chinese",
+            "zh-Hant": "中文"
+          },
+          {
+            "en": "Bilingual",
+            "zh-Hant": "雙語"
+          }
+        ],
+        "default": "both",
+        "description": {
+          "en": "Which language(s) to show on the panel.",
+          "zh-Hant": "畫面用邊種語言顯示。"
+        }
+      }
+    },
+    "required": [
+      "latitude",
+      "longitude",
+      "n",
+      "lang"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "stores",
+        "type": "https",
+        "url": "https://sushipass.sushiro.com.hk/api/2.0/info/storelist?latitude={{params.latitude}}&longitude={{params.longitude}}&numresults={{params.n}}&region=HK",
+        "format": "json",
+        "max_bytes": 262144,
+        "extract": {
+          "open_stores": "[?storeStatus=='OPEN']",
+          "open_count": "[?storeStatus=='OPEN']|length"
+        }
+      },
+      {
+        "id": "calling",
+        "type": "https",
+        "when": "params.show_calling",
+        "url": "https://sushipass.sushiro.com.hk/api/2.0/remote/groupqueues?region=HK&storeid={{params.fav_store}}",
+        "format": "json",
+        "extract": {
+          "now_calling": "storeQueue|first(4)",
+          "queue_len": "storeQueue|length"
+        }
+      }
+    ]
+  },
+  "strings": {
+    "wait_min": {
+      "en": "min wait",
+      "zh-Hant": "分鐘等候"
+    },
+    "all_closed": {
+      "en": "All branches closed now",
+      "zh-Hant": "所有分店現正休息"
+    },
+    "calling_hdr": {
+      "en": "Now calling",
+      "zh-Hant": "現正叫號"
+    },
+    "queue_len": {
+      "en": "groups waiting",
+      "zh-Hant": "組等候中"
+    },
+    "no_queue": {
+      "en": "No queue right now",
+      "zh-Hant": "而家唔使排隊"
+    }
+  },
+  "render": {
+    "chrome": "standard",
+    "lang_param": "lang",
+    "widgets": [
+      {
+        "type": "column",
+        "padding": [
+          8,
+          24,
+          8,
+          24
+        ],
+        "gap": 6,
+        "children": [
+          {
+            "type": "list",
+            "bind": "data.open_stores",
+            "max_rows": {
+              "param": "n"
+            },
+            "gap": 4,
+            "empty_text": "{{strings.all_closed}}",
+            "row": [
+              {
+                "type": "row",
+                "gap": 12,
+                "align": "center",
+                "flex": 1,
+                "children": [
+                  {
+                    "type": "column",
+                    "flex": 1,
+                    "gap": 0,
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "{{item.name}}",
+                        "size": "medium",
+                        "weight": "bold",
+                        "max_lines": 1,
+                        "when": "params.lang != 'en'"
+                      },
+                      {
+                        "type": "text",
+                        "value": "{{item.nameEn}}",
+                        "size": "small",
+                        "max_lines": 1,
+                        "when": "params.lang != 'zh'"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "value": "{{item.wait|pad(2,' ')}} {{strings.wait_min}}",
+                    "size": "medium",
+                    "weight": "bold",
+                    "color": "good",
+                    "align": "right",
+                    "when": "item.wait <= '5'"
+                  },
+                  {
+                    "type": "text",
+                    "value": "{{item.wait|pad(2,' ')}} {{strings.wait_min}}",
+                    "size": "medium",
+                    "weight": "bold",
+                    "color": "warn",
+                    "align": "right",
+                    "when": {
+                      "all": [
+                        "item.wait > '5'",
+                        "item.wait <= '15'"
+                      ]
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "{{item.wait|pad(2,' ')}} {{strings.wait_min}}",
+                    "size": "medium",
+                    "weight": "bold",
+                    "color": "danger",
+                    "align": "right",
+                    "when": "item.wait > '15'"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "divider",
+            "when": "params.show_calling"
+          },
+          {
+            "type": "column",
+            "gap": 4,
+            "when": "params.show_calling",
+            "children": [
+              {
+                "type": "row",
+                "gap": 10,
+                "align": "center",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "{{params.fav_store|enum_title('fav_store')}} — {{strings.calling_hdr}}",
+                    "size": "small",
+                    "weight": "bold",
+                    "flex": 1
+                  },
+                  {
+                    "type": "text",
+                    "value": "{{data.queue_len}} {{strings.queue_len}}",
+                    "size": "small",
+                    "color": "info",
+                    "when": "data.queue_len exists"
+                  }
+                ]
+              },
+              {
+                "type": "list",
+                "bind": "data.now_calling",
+                "max_rows": 4,
+                "gap": 2,
+                "empty_text": "{{strings.no_queue}}",
+                "row": [
+                  {
+                    "type": "text",
+                    "value": "{{item}}",
+                    "size": "large",
+                    "weight": "bold"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    },
+    "windows": [
+      {
+        "days": [
+          "mon",
+          "tue",
+          "wed",
+          "thu",
+          "fri",
+          "sat",
+          "sun"
+        ],
+        "from": "11:00",
+        "to": "14:30",
+        "every_min": 15
+      },
+      {
+        "days": [
+          "mon",
+          "tue",
+          "wed",
+          "thu",
+          "fri",
+          "sat",
+          "sun"
+        ],
+        "from": "17:00",
+        "to": "21:30",
+        "every_min": 15
+      }
+    ]
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "yat": 1,
+  "id": "test-chart-sheet",
+  "version": "1.0.0",
+  "name": {
+    "en": "Chart sheet",
+    "zh-Hant": "圖表測試"
+  },
+  "description": {
+    "en": "Every §9.12a chart case on one sheet: auto-scale, pinned bounds, a flat series, gaps, numeric strings and a single sample.",
+    "zh-Hant": "一版睇齊 §9.12a 圖表嘅各種情況：自動刻度、固定刻度、平線、缺數、字串數字同單點。"
+  },
+  "aliases": {
+    "en": [
+      "chart sheet"
+    ],
+    "zh-Hant": [
+      "圖表測試"
+    ],
+    "jyutping": [
+      "tou4 biu2"
+    ]
+  },
+  "params": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "series",
+        "type": "inline",
+        "data": {
+          "wave": [
+            22,
+            21,
+            24,
+            27,
+            26,
+            29,
+            25,
+            23
+          ],
+          "flat": [
+            7,
+            7,
+            7,
+            7,
+            7,
+            7
+          ],
+          "gappy": [
+            10,
+            null,
+            12,
+            13,
+            null,
+            9
+          ],
+          "strs": [
+            "21.5",
+            "22.0",
+            "20.8",
+            "23.9",
+            "22.4"
+          ],
+          "one": [
+            42
+          ],
+          "junk": [
+            "nope",
+            "still nope"
+          ],
+          "scalar": 5
+        },
+        "extract": {
+          "wave": "wave",
+          "flat": "flat",
+          "gappy": "gappy",
+          "strs": "strs",
+          "one": "one",
+          "junk": "junk",
+          "scalar": "scalar"
+        }
+      }
+    ]
+  },
+  "render": {
+    "chrome": "none",
+    "widgets": [
+      {
+        "type": "column",
+        "gap": 6,
+        "padding": [
+          6,
+          10,
+          6,
+          10
+        ],
+        "children": [
+          {
+            "type": "row",
+            "gap": 10,
+            "children": [
+              {
+                "type": "text",
+                "value": "auto+dots",
+                "size": "small"
+              },
+              {
+                "type": "chart",
+                "bind": "data.wave",
+                "height": 44,
+                "dots": true
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "children": [
+              {
+                "type": "text",
+                "value": "pinned 0-40",
+                "size": "small"
+              },
+              {
+                "type": "chart",
+                "bind": "data.wave",
+                "min": 0,
+                "max": 40,
+                "height": 44
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "children": [
+              {
+                "type": "text",
+                "value": "flat",
+                "size": "small"
+              },
+              {
+                "type": "chart",
+                "bind": "data.flat",
+                "height": 44,
+                "color": "blue"
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "children": [
+              {
+                "type": "text",
+                "value": "gaps",
+                "size": "small"
+              },
+              {
+                "type": "chart",
+                "bind": "data.gappy",
+                "height": 44,
+                "dots": true,
+                "color": "red"
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "children": [
+              {
+                "type": "text",
+                "value": "strings",
+                "size": "small"
+              },
+              {
+                "type": "chart",
+                "bind": "data.strs",
+                "height": 44,
+                "dots": true
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "children": [
+              {
+                "type": "text",
+                "value": "one sample",
+                "size": "small"
+              },
+              {
+                "type": "chart",
+                "bind": "data.one",
+                "height": 44,
+                "dots": true
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "children": [
+              {
+                "type": "text",
+                "value": "no numbers",
+                "size": "small"
+              },
+              {
+                "type": "chart",
+                "bind": "data.junk",
+                "height": 44,
+                "dots": true
+              }
+            ]
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "children": [
+              {
+                "type": "text",
+                "value": "not an array",
+                "size": "small"
+              },
+              {
+                "type": "chart",
+                "bind": "data.scalar",
+                "height": 44,
+                "dots": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

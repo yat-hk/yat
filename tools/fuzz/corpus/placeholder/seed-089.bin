@@ -1,0 +1,1 @@
+1temperature.data[?place=='{{params.district}}'].value|[0]

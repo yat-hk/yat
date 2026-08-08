@@ -1,0 +1,1 @@
+3{"any": ["data.tc_code == 'TC8NE'", "data.tc_code == 'TC8SE'", "data.tc_code == 'TC8SW'", "data.tc_code == 'TC8NW'"]}

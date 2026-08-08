@@ -1,0 +1,1 @@
+1發出時間 issued {{data.rain_issued|time_hhmm}}

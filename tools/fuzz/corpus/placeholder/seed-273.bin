@@ -1,0 +1,1 @@
+1{{now|date_fmt('D/M')}} {{now|weekday('en-short')}}

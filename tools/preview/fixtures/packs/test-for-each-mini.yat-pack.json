@@ -1,0 +1,101 @@
+{
+  "yat": 1,
+  "id": "test-for-each-mini",
+  "name": {
+    "en": "for_each engine test (internal)"
+  },
+  "description": {
+    "en": "Purpose-built pack exercising for_each + collect fan-out, {{each}} substitution, and URL percent-encoding against checked-in JSON fixtures. Not a real content pack."
+  },
+  "aliases": {
+    "en": [
+      "for each engine test"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "codes": {
+        "type": "array",
+        "title": "Codes",
+        "maxItems": 3,
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16
+        },
+        "default": [
+          "AAA",
+          "BB CD",
+          "EF你好"
+        ]
+      },
+      "owner": {
+        "type": "string",
+        "title": "Owner",
+        "maxLength": 32,
+        "default": "K K 你好"
+      }
+    },
+    "required": [
+      "codes",
+      "owner"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "results",
+        "type": "https",
+        "for_each": "params.codes",
+        "url": "https://example.com/api?code={{each}}&owner={{params.owner}}",
+        "format": "json",
+        "collect": {
+          "field": "results",
+          "extract": {
+            "value": "value",
+            "flag": "flag"
+          }
+        }
+      }
+    ]
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [
+          16,
+          24,
+          16,
+          24
+        ],
+        "gap": 4,
+        "children": [
+          {
+            "type": "text",
+            "value": "for_each engine test",
+            "size": "medium",
+            "weight": "bold"
+          },
+          {
+            "type": "text",
+            "value": "{{params.owner}}",
+            "size": "small"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

@@ -1,0 +1,413 @@
+{
+  "yat": 1,
+  "id": "test-ink-roles",
+  "version": "1.0.0",
+  "name": {
+    "en": "ink roles engine test",
+    "zh-Hant": "語意色角色測試"
+  },
+  "description": {
+    "en": "Every §9.1a ink role through each widget that takes a colour. Colours come from params holding both spellings, so the role render and the raw-ink render must match byte for byte. Not a content pack.",
+    "zh-Hant": "測試用，唔係真嘅內容版面。"
+  },
+  "aliases": {
+    "en": [
+      "ink roles"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "c_accent": {
+        "type": "string",
+        "title": {
+          "en": "accent spelling"
+        },
+        "enum": [
+          "accent",
+          "red"
+        ],
+        "default": "accent"
+      },
+      "c_good": {
+        "type": "string",
+        "title": {
+          "en": "good spelling"
+        },
+        "enum": [
+          "good",
+          "green"
+        ],
+        "default": "good"
+      },
+      "c_warn": {
+        "type": "string",
+        "title": {
+          "en": "warn spelling"
+        },
+        "enum": [
+          "warn",
+          "yellow"
+        ],
+        "default": "warn"
+      },
+      "c_danger": {
+        "type": "string",
+        "title": {
+          "en": "danger spelling"
+        },
+        "enum": [
+          "danger",
+          "red"
+        ],
+        "default": "danger"
+      },
+      "c_info": {
+        "type": "string",
+        "title": {
+          "en": "info spelling"
+        },
+        "enum": [
+          "info",
+          "blue"
+        ],
+        "default": "info"
+      },
+      "c_muted": {
+        "type": "string",
+        "title": {
+          "en": "muted spelling"
+        },
+        "enum": [
+          "muted",
+          "black"
+        ],
+        "default": "muted"
+      }
+    },
+    "required": [
+      "c_accent",
+      "c_good",
+      "c_warn",
+      "c_danger",
+      "c_info",
+      "c_muted"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": []
+  },
+  "render": {
+    "chrome": "none",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "gap": 10,
+        "padding": [
+          12,
+          16,
+          12,
+          16
+        ],
+        "children": [
+          {
+            "type": "row",
+            "gap": 10,
+            "align": "center",
+            "children": [
+              {
+                "type": "icon",
+                "name": "star",
+                "size": "small",
+                "color": {
+                  "param": "c_accent"
+                }
+              },
+              {
+                "type": "text",
+                "value": "accent · 重點",
+                "size": "medium",
+                "weight": "bold",
+                "color": {
+                  "param": "c_accent"
+                },
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "value": "accent",
+                "size": "small",
+                "color": "accent"
+              }
+            ]
+          },
+          {
+            "type": "bar",
+            "value": "0.9",
+            "min": "0",
+            "max": "1",
+            "height": 14,
+            "color": {
+              "param": "c_accent"
+            }
+          },
+          {
+            "type": "divider",
+            "thickness": 2,
+            "color": {
+              "param": "c_accent"
+            }
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "align": "center",
+            "children": [
+              {
+                "type": "icon",
+                "name": "check",
+                "size": "small",
+                "color": {
+                  "param": "c_good"
+                }
+              },
+              {
+                "type": "text",
+                "value": "good · 冇事",
+                "size": "medium",
+                "weight": "bold",
+                "color": {
+                  "param": "c_good"
+                },
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "value": "good",
+                "size": "small",
+                "color": "good"
+              }
+            ]
+          },
+          {
+            "type": "bar",
+            "value": "0.75",
+            "min": "0",
+            "max": "1",
+            "height": 14,
+            "color": {
+              "param": "c_good"
+            }
+          },
+          {
+            "type": "divider",
+            "thickness": 2,
+            "color": {
+              "param": "c_good"
+            }
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "align": "center",
+            "children": [
+              {
+                "type": "icon",
+                "name": "alert",
+                "size": "small",
+                "color": {
+                  "param": "c_warn"
+                }
+              },
+              {
+                "type": "text",
+                "value": "warn · 留意",
+                "size": "medium",
+                "weight": "bold",
+                "color": {
+                  "param": "c_warn"
+                },
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "value": "warn",
+                "size": "small",
+                "color": "warn"
+              }
+            ]
+          },
+          {
+            "type": "bar",
+            "value": "0.6",
+            "min": "0",
+            "max": "1",
+            "height": 14,
+            "color": {
+              "param": "c_warn"
+            }
+          },
+          {
+            "type": "divider",
+            "thickness": 2,
+            "color": {
+              "param": "c_warn"
+            }
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "align": "center",
+            "children": [
+              {
+                "type": "icon",
+                "name": "alert",
+                "size": "small",
+                "color": {
+                  "param": "c_danger"
+                }
+              },
+              {
+                "type": "text",
+                "value": "danger · 危險",
+                "size": "medium",
+                "weight": "bold",
+                "color": {
+                  "param": "c_danger"
+                },
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "value": "danger",
+                "size": "small",
+                "color": "danger"
+              }
+            ]
+          },
+          {
+            "type": "bar",
+            "value": "0.45",
+            "min": "0",
+            "max": "1",
+            "height": 14,
+            "color": {
+              "param": "c_danger"
+            }
+          },
+          {
+            "type": "divider",
+            "thickness": 2,
+            "color": {
+              "param": "c_danger"
+            }
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "align": "center",
+            "children": [
+              {
+                "type": "icon",
+                "name": "clock",
+                "size": "small",
+                "color": {
+                  "param": "c_info"
+                }
+              },
+              {
+                "type": "text",
+                "value": "info · 補充",
+                "size": "medium",
+                "weight": "bold",
+                "color": {
+                  "param": "c_info"
+                },
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "value": "info",
+                "size": "small",
+                "color": "info"
+              }
+            ]
+          },
+          {
+            "type": "bar",
+            "value": "0.3",
+            "min": "0",
+            "max": "1",
+            "height": 14,
+            "color": {
+              "param": "c_info"
+            }
+          },
+          {
+            "type": "divider",
+            "thickness": 2,
+            "color": {
+              "param": "c_info"
+            }
+          },
+          {
+            "type": "row",
+            "gap": 10,
+            "align": "center",
+            "children": [
+              {
+                "type": "icon",
+                "name": "arrow_right",
+                "size": "small",
+                "color": {
+                  "param": "c_muted"
+                }
+              },
+              {
+                "type": "text",
+                "value": "muted · 次要",
+                "size": "medium",
+                "color": {
+                  "param": "c_muted"
+                },
+                "flex": 1
+              },
+              {
+                "type": "text",
+                "value": "muted",
+                "size": "small",
+                "color": "muted"
+              }
+            ]
+          },
+          {
+            "type": "bar",
+            "value": "0.15",
+            "min": "0",
+            "max": "1",
+            "height": 14,
+            "color": {
+              "param": "c_muted"
+            }
+          },
+          {
+            "type": "divider",
+            "thickness": 2,
+            "color": {
+              "param": "c_muted"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 180
+    }
+  }
+}

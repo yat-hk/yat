@@ -1,0 +1,274 @@
+{
+  "yat": 1,
+  "id": "temp-trend",
+  "version": "2.2.0",
+  "name": {
+    "en": "Temperature Today",
+    "zh-Hant": "今日氣溫"
+  },
+  "description": {
+    "en": "Current temperature, today's high/low, and today's 3-hourly temperature curve (observed + forecast) from Open-Meteo. Chart is pinned to an 8-36°C scale so hot and cool days actually look different.",
+    "zh-Hant": "現時氣溫、今日最高最低溫，以及今日每三小時氣溫曲線（實測加預報），數據來自 Open-Meteo。圖表採用固定 8 至 36°C 刻度（並非自動縮放），令炎熱同涼爽嘅日子睇落真係有分別，唔止上面嘅數字先睇得出。"
+  },
+  "aliases": {
+    "en": [
+      "temperature",
+      "temperature today"
+    ],
+    "zh-Hant": [
+      "氣溫",
+      "今日氣溫"
+    ],
+    "jyutping": [
+      "hei3 wan1"
+    ]
+  },
+  "params": {
+    "type": "object",
+    "properties": {
+      "latitude": {
+        "type": "number",
+        "title": {
+          "en": "Latitude",
+          "zh-Hant": "緯度"
+        },
+        "description": {
+          "en": "Sets the location for this page. If unsure, just leave the default (Hong Kong Observatory).",
+          "zh-Hant": "用嚟定呢版顯示邊度嘅氣溫。唔識填就照用預設（香港天文台）。"
+        },
+        "minimum": -90,
+        "maximum": 90,
+        "default": 22.302
+      },
+      "longitude": {
+        "type": "number",
+        "title": {
+          "en": "Longitude",
+          "zh-Hant": "經度"
+        },
+        "description": {
+          "en": "Works together with latitude above. If unsure, just leave the default.",
+          "zh-Hant": "同上面嘅緯度一齊用嚟定位。唔識填就照用預設。"
+        },
+        "minimum": -180,
+        "maximum": 180,
+        "default": 114.177
+      },
+      "label": {
+        "type": "string",
+        "title": {
+          "en": "Location label",
+          "zh-Hant": "地點名稱"
+        },
+        "description": {
+          "en": "The name shown on the page for this location.",
+          "zh-Hant": "呢版顯示嘅地點名稱。"
+        },
+        "maxLength": 32,
+        "default": "Hong Kong"
+      },
+      "lang": {
+        "type": "string",
+        "title": {
+          "en": "Language",
+          "zh-Hant": "語言"
+        },
+        "enum": [
+          "en",
+          "zh",
+          "both"
+        ],
+        "enum_titles": [
+          {
+            "en": "English"
+          },
+          {
+            "en": "Chinese",
+            "zh-Hant": "中文"
+          },
+          {
+            "en": "Bilingual",
+            "zh-Hant": "雙語"
+          }
+        ],
+        "default": "both",
+        "description": {
+          "en": "Which language(s) to show on the panel.",
+          "zh-Hant": "畫面用邊種語言顯示。"
+        }
+      }
+    },
+    "required": [
+      "latitude",
+      "longitude",
+      "label"
+    ],
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "meteo",
+        "type": "https",
+        "url": "https://api.open-meteo.com/v1/forecast?latitude={{params.latitude}}&longitude={{params.longitude}}&current=temperature_2m&hourly=temperature_2m&temporal_resolution=hourly_3&forecast_days=1&daily=temperature_2m_max,temperature_2m_min&timezone=auto",
+        "format": "json",
+        "max_bytes": 16384,
+        "extract": {
+          "temp_now": "current.temperature_2m|round(0)",
+          "obs_time": "current.time",
+          "hi_today": "daily.temperature_2m_max[0]|round(0)",
+          "lo_today": "daily.temperature_2m_min[0]|round(0)",
+          "temps": "hourly.temperature_2m",
+          "first_hour": "hourly.time[0]",
+          "last_hour": "hourly.time[-1]"
+        }
+      }
+    ]
+  },
+  "strings": {
+    "caption": {
+      "en": "Today · every 3 hours (observed + forecast)",
+      "zh-Hant": "今日每三小時（實測＋預報）"
+    },
+    "as_of": {
+      "en": "as of",
+      "zh-Hant": "更新於"
+    }
+  },
+  "render": {
+    "chrome": "standard",
+    "lang_param": "lang",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [
+          12,
+          24,
+          12,
+          24
+        ],
+        "gap": 8,
+        "children": [
+          {
+            "type": "row",
+            "gap": 20,
+            "align": "center",
+            "children": [
+              {
+                "type": "bignum",
+                "value": "{{data.temp_now}}°",
+                "size": "xlarge",
+                "when": "data.temp_now >= '0'"
+              },
+              {
+                "type": "bignum",
+                "value": "-{{data.temp_now|abs}}°",
+                "size": "xlarge",
+                "color": "blue",
+                "when": "data.temp_now < '0'"
+              },
+              {
+                "type": "bignum",
+                "value": "—",
+                "size": "xlarge",
+                "when": "data.temp_now missing"
+              },
+              {
+                "type": "column",
+                "flex": 1,
+                "gap": 4,
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "{{params.label}}",
+                    "size": "large",
+                    "weight": "bold"
+                  },
+                  {
+                    "type": "row",
+                    "gap": 8,
+                    "children": [
+                      {
+                        "type": "icon",
+                        "name": "arrow_up",
+                        "size": "small",
+                        "color": "red"
+                      },
+                      {
+                        "type": "text",
+                        "value": "{{data.hi_today}}°",
+                        "size": "medium",
+                        "weight": "bold"
+                      },
+                      {
+                        "type": "icon",
+                        "name": "arrow_down",
+                        "size": "small",
+                        "color": "blue"
+                      },
+                      {
+                        "type": "text",
+                        "value": "{{data.lo_today}}°",
+                        "size": "medium"
+                      },
+                      {
+                        "type": "text",
+                        "value": "{{strings.as_of}} {{data.obs_time|time_hhmm}}",
+                        "size": "small",
+                        "flex": 1,
+                        "align": "right",
+                        "when": "data.obs_time exists"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "divider"
+          },
+          {
+            "type": "text",
+            "value": "{{strings.caption}}",
+            "size": "small",
+            "max_lines": 2
+          },
+          {
+            "type": "chart",
+            "mode": "line",
+            "bind": "data.temps",
+            "min": 8,
+            "max": 36,
+            "dots": true,
+            "show_bounds": true,
+            "flex": 1
+          },
+          {
+            "type": "row",
+            "children": [
+              {
+                "type": "text",
+                "value": "{{data.first_hour|time_hhmm}}",
+                "size": "small"
+              },
+              {
+                "type": "text",
+                "value": "{{data.last_hour|time_hhmm}}",
+                "size": "small",
+                "flex": 1,
+                "align": "right"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

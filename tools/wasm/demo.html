@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>yat-wasm demo</title>
+<style>
+  body { font: 14px/1.4 -apple-system, system-ui, sans-serif; margin: 2rem; background: #f4f4f4; }
+  canvas { border: 1px solid #999; image-rendering: pixelated; width: 800px; height: 480px; background: #fff; }
+  #log { white-space: pre-wrap; font: 12px/1.4 ui-monospace, monospace; background: #111; color: #0f0;
+         padding: 0.75rem; max-width: 800px; max-height: 200px; overflow: auto; }
+  h1 { font-size: 1.1rem; }
+</style>
+</head>
+<body>
+<h1>YAT engine — WASM target (feasibility spike)</h1>
+<p>Renders <code>packs/examples/hko-now.yat-pack.json</code> against the pinned fixture
+<code>tools/preview/fixtures/hko-now.current.json</code>, using the same
+<code>--now</code> instant as the native/wasm identity test
+(<code>test-identity.mjs</code>). This is a human-openable proof, not part of the
+automated test — see README.md.</p>
+<p>Serve from the repo root, e.g.:
+<code>python3 -m http.server 8080</code>, then open
+<code>http://localhost:8080/tools/wasm/demo.html</code>. Opening this file directly
+(<code>file://</code>) will not work — browsers block <code>fetch()</code> of local
+files and streaming wasm compilation without an http server.</p>
+<canvas id="cv" width="800" height="480"></canvas>
+<div id="log">loading…</div>
+<script src="yat-engine.js"></script>
+<script>
+const NOW = 1785142800; // pinned instant, matches tools/preview/run-tests.sh
+const log = (msg) => { document.getElementById('log').textContent += msg + "\n"; };
+
+async function main() {
+  log("fetching pack + fixture…");
+  const [packJson, fixture] = await Promise.all([
+    fetch("../../packs/examples/hko-now.yat-pack.json").then(r => r.text()),
+    fetch("../preview/fixtures/hko-now.current.json").then(r => r.text()),
+  ]);
+  const docsJson = JSON.stringify({ current: fixture });
+
+  log("instantiating wasm module…");
+  const t0 = performance.now();
+  const mod = await YatModule();
+  log(`module ready in ${(performance.now() - t0).toFixed(1)}ms`);
+
+  const w = mod.ccall("yat_get_width", "number", [], []);
+  const h = mod.ccall("yat_get_height", "number", [], []);
+  log(`canvas: ${w}x${h}`);
+
+  const t1 = performance.now();
+  const rc = mod.ccall("yat_render", "number",
+    ["string", "string", "string", "number"], [packJson, "", docsJson, NOW]);
+  log(`yat_render rc=${rc} in ${(performance.now() - t1).toFixed(1)}ms`);
+  const err = mod.ccall("yat_get_error", "string", [], []);
+  if (err) log(`engine message: ${err}`);
+  if (rc !== 0) { log("render FAILED — see message above"); return; }
+
+  const ptr = mod.ccall("yat_get_buffer", "number", [], []);
+  const rgba = mod.HEAPU8.subarray(ptr, ptr + w * h * 4);
+
+  const canvas = document.getElementById("cv");
+  const ctx = canvas.getContext("2d");
+  const imageData = new ImageData(new Uint8ClampedArray(rgba), w, h);
+  ctx.putImageData(imageData, 0, 0);
+  log("drawn.");
+}
+
+main().catch(e => log("ERROR: " + e.stack));
+</script>
+</body>
+</html>

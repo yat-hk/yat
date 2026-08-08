@@ -1,0 +1,1 @@
+0https://sushipass.sushiro.com.hk/api/2.0/info/storelist?latitude={{params.latitude}}&longitude={{params.longitude}}&numresults={{params.n}}&region=HK

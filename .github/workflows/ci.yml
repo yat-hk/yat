@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  engine-tests:
+    runs-on: ubuntu-latest
+    # The same tree lives in a private working repo; jobs run only on the public one.
+    if: github.repository == 'yat-hk/yat'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run engine tests
+        run: cd tools/preview && make && ./run-tests.sh
+
+  pack-validate:
+    runs-on: ubuntu-latest
+    # The same tree lives in a private working repo; jobs run only on the public one.
+    if: github.repository == 'yat-hk/yat'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate example packs
+        run: npx --yes ajv-cli@5 validate --spec=draft2020 -s schema/yat-pack.schema.json -d "packs/examples/*.yat-pack.json"
+      - name: Validate fixture test packs
+        run: npx --yes ajv-cli@5 validate --spec=draft2020 -s schema/yat-pack.schema.json -d "tools/preview/fixtures/packs/*.yat-pack.json"
+
+  firmware-build:
+    runs-on: ubuntu-latest
+    # The same tree lives in a private working repo; jobs run only on the public one.
+    if: github.repository == 'yat-hk/yat'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect firmware changes
+        id: detect
+        run: |
+          set -euo pipefail
+
+          # Determine the base commit for comparison
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_SHA="HEAD~1"
+          fi
+
+          # Check if firmware/, engine/, or platformio.ini changed between base and HEAD
+          if git diff --quiet "$BASE_SHA" HEAD -- firmware/ engine/ platformio.ini 2>/dev/null; then
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Log skip reason
+        if: steps.detect.outputs.should_build == 'false'
+        run: echo "firmware unchanged — skipped"
+
+      - name: Set up Python
+        if: steps.detect.outputs.should_build == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache PlatformIO
+        if: steps.detect.outputs.should_build == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ runner.os }}-${{ hashFiles('firmware/platformio.ini') }}
+          restore-keys: |
+            pio-${{ runner.os }}-
+
+      - name: Install PlatformIO
+        if: steps.detect.outputs.should_build == 'true'
+        run: pip install --upgrade platformio
+
+      - name: Create placeholder secrets.h
+        if: steps.detect.outputs.should_build == 'true'
+        run: cp firmware/include/secrets.h.example firmware/include/secrets.h
+
+      - name: Build firmware
+        if: steps.detect.outputs.should_build == 'true'
+        run: cd firmware && pio run

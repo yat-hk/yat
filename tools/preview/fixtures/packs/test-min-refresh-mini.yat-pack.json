@@ -1,0 +1,70 @@
+{
+  "yat": 1,
+  "id": "test-min-refresh-mini",
+  "name": {
+    "en": "min_refresh_min engine test (i"
+  },
+  "description": {
+    "en": "Purpose-built pack exercising §5.1 min_refresh_min: within the interval since the last successful fetch, the engine serves the persisted snapshot's fields as fresh with no network fetch at all. Not..."
+  },
+  "aliases": {
+    "en": [
+      "min refresh engine test"
+    ],
+    "zh-Hant": [],
+    "jyutping": []
+  },
+  "params": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "data": {
+    "sources": [
+      {
+        "id": "quote",
+        "type": "https",
+        "min_refresh_min": 60,
+        "url": "https://example.com/api/quote",
+        "format": "json",
+        "extract": {
+          "value": "value"
+        }
+      }
+    ]
+  },
+  "render": {
+    "chrome": "standard",
+    "widgets": [
+      {
+        "type": "column",
+        "flex": 1,
+        "padding": [
+          16,
+          24,
+          16,
+          24
+        ],
+        "gap": 4,
+        "children": [
+          {
+            "type": "text",
+            "value": "min_refresh_min engine test",
+            "size": "medium",
+            "weight": "bold"
+          },
+          {
+            "type": "text",
+            "value": "{{data.value}}",
+            "size": "small"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "default": {
+      "every_min": 60
+    }
+  }
+}

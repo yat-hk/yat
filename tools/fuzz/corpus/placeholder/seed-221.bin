@@ -1,0 +1,1 @@
+1{{item.delta|sign_char}}{{item.delta|abs|round(1)}}%

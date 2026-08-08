@@ -1,0 +1,1 @@
+1https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage={{params.story_count}}&numericFilters=points%3E%3D{{params.min_points}}

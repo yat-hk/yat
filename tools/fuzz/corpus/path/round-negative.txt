@@ -1,0 +1,1 @@
+temperature.data[0].value|round(-1)
